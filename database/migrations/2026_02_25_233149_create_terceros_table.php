@@ -13,6 +13,23 @@ return new class extends Migration
     {
         Schema::create('terceros', function (Blueprint $table) {
             $table->id();
+
+            // multiempresa
+            $table->foreignId('empresa_id')->constrained('empresas');
+
+            $table->string('rut')->nullable();
+            $table->string('razon_social');
+
+            // cliente o proveedor
+            $table->enum('tipo', ['cliente','proveedor','ambos']);
+
+            $table->string('direccion')->nullable();
+            $table->string('telefono')->nullable();
+            $table->string('email')->nullable();
+
+            $table->boolean('estado')->default(true);
+
+            $table->softDeletes();
             $table->timestamps();
         });
     }
