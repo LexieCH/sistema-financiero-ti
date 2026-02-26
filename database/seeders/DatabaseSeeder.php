@@ -16,6 +16,10 @@ class DatabaseSeeder extends Seeder
             EmpresaSeeder::class,
             UserSeeder::class,
             TipoDocumentoSeeder::class,
+            TipoMovimientoSeeder::class,
+            CategoriaSeeder::class,
+            MetodoPagoSeeder::class,
+            TerceroSeeder::class,
         ]);
         
     }
