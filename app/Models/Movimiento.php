@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\TipoMovimiento;
 use App\Models\Categoria;
 use App\Models\User;
+use App\Models\Socio;
+use App\Models\CentroCosto;
 
 class Movimiento extends Model
 {
@@ -18,12 +20,18 @@ class Movimiento extends Model
         'tipo_movimiento_id',
         'categoria_id',
         'metodo_pago_id',
+        'centro_costo_id',
+        'socio_id',
+        'documento_id',
         'tercero_id',
         'monto',
         'fecha',
+        'referencia',
         'descripcion',
         'estado'
     ];
+
+            //relaciones 
 
     public function tipoMovimiento(){
         return $this->belongsTo(TipoMovimiento::class);
@@ -35,5 +43,17 @@ class Movimiento extends Model
 
     public function usuario(){
         return $this->belongsTo(User::class,'usuario_id');
+    }
+    
+    public function documento(){
+        return $this->belongsTo(Documento::class);
+    }
+
+    public function socio(){
+        return $this->belongsTo(Socio::class);
+    }
+
+    public function centroCosto(){
+        return $this->belongsTo(CentroCosto::class);
     }
 }

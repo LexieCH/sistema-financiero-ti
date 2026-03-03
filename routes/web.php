@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\MovimientoController;
+use App\Http\Controllers\TerceroController;
+use App\Http\Controllers\DocumentoController;
 
 Route::get('/', function () {
     return redirect('/login');
@@ -20,8 +22,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::resource('empresas', EmpresaController::class);
     Route::resource('usuarios', UsuarioController::class);
-    Route::resource('movimientos', MovimientoController::class)
-    ->middleware('auth');
+    Route::resource('movimientos', MovimientoController::class)->middleware('auth');
+    Route::resource('terceros',TerceroController::class);
+    Route::resource('documentos', DocumentoController::class);
 });
 
 require __DIR__.'/auth.php';

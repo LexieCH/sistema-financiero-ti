@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('empresa_id')->constrained('empresas');
-            $table->foreignId('tercero_id')->nullable();
+            $table->foreignId('tercero_id')->nullable()->constrained('terceros')->nullOnDelete();
             $table->foreignId('usuario_id')->constrained('users');
             $table->foreignId('tipo_documento_id')->constrained('tipo_documentos');
 

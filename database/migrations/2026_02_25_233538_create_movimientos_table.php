@@ -23,8 +23,8 @@ return new class extends Migration
             // tipo movimiento (ingreso, egreso, retiro socio…)
             $table->foreignId('tipo_movimiento_id')->constrained('tipo_movimientos');
 
-            // categoria financiera
-            $table->foreignId('categoria_id')->constrained('categorias');
+            // categoria financiera (sirve para informes, cada empresa la crea)
+            $table->foreignId('categoria_id')->nullable()->constrained('categorias');
 
             // metodo pago
             $table->foreignId('metodo_pago_id')->nullable()->constrained('metodo_pagos');

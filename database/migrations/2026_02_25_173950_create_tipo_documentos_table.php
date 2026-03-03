@@ -19,6 +19,11 @@ return new class extends Migration
             $table->enum('categoria',['compra','venta','interno']);
             $table->enum('estado',['activo','inactivo'])->default('activo');
             $table->timestamps();
+            $table->boolean('genera_movimiento')->default(false);
+            $table->foreignId('tipo_movimiento_id')
+                ->nullable()
+                ->constrained('tipo_movimientos')
+                ->nullOnDelete();
         });
     }
 
