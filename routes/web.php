@@ -8,6 +8,8 @@ use App\Http\Controllers\MovimientoController;
 use App\Http\Controllers\TerceroController;
 use App\Http\Controllers\DocumentoController;
 
+
+
 Route::get('/', function () {
     return redirect('/login');
 });
@@ -25,6 +27,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('movimientos', MovimientoController::class)->middleware('auth');
     Route::resource('terceros',TerceroController::class);
     Route::resource('documentos', DocumentoController::class);
+    Route::patch('/documentos/{id}/pagado', [DocumentoController::class, 'marcarPagado'])
+    ->name('documentos.pagado');
 });
 
 require __DIR__.'/auth.php';

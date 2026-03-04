@@ -104,4 +104,16 @@ class DocumentoController extends Controller
             return back()->with('error','Error: '.$e->getMessage());
         }
     }
+
+    public function marcarPagado($id)
+    {
+        $documento = Documento::findOrFail($id);
+
+        $documento->update([
+            'estado' => 'pagado'
+        ]);
+
+        return redirect()->route('documentos.index')
+            ->with('operación exitosa', 'Documento marcado como pagado');
+    }
 }

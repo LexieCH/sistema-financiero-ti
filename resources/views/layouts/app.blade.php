@@ -29,9 +29,9 @@
             <a href="/dashboard" class="block px-4 py-2 rounded hover:bg-gray-700">Dashboard</a>
             <a href="/empresas" class="block px-4 py-2 rounded hover:bg-gray-700">Empresas</a>
             <a href="/usuarios" class="block px-4 py-2 rounded hover:bg-gray-700">Usuarios</a>
-            <a href="#" class="block px-4 py-2 rounded hover:bg-gray-700">Roles</a>
+            <a href="/roles" class="block px-4 py-2 rounded hover:bg-gray-700">Roles</a>
             <a href="/movimientos" class="block px-4 py-2 rounded hover:bg-gray-700">Movimientos</a>
-            <a href="#" class="block px-4 py-2 rounded hover:bg-gray-700">Documentos</a>
+            <a href="/documentos" class="block px-4 py-2 rounded hover:bg-gray-700">Documentos</a>
             <a href="#" class="block px-4 py-2 rounded hover:bg-gray-700">Reportes</a>
         </nav>
 
