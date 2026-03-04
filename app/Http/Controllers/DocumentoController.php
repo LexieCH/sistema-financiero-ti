@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Documento;
 use App\Models\Movimiento;
 use App\Models\TipoDocumento;
+use App\Models\TipoMovimiento;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -107,13 +108,39 @@ class DocumentoController extends Controller
 
     public function marcarPagado($id)
     {
-        $documento = Documento::findOrFail($id);
+        return DB::transaction(function () use ($id) {
 
-        $documento->update([
-            'estado' => 'pagado'
-        ]);
+            $documento = Documento::with('tipoDocumento')->findOrFail($id);
 
-        return redirect()->route('documentos.index')
-            ->with('operación exitosa', 'Documento marcado como pagado');
+            if ($documento->estado === 'pagado') {
+                return redirect()->route('documentos.index')
+                    ->with('error', 'El documento ya está pagado.');
+            }
+
+            $tipoDocumento = $documento->tipoDocumento;
+
+            // Si el tipo documento no genera movimiento, solo cambia estado
+            if ($tipoDocumento->genera_movimiento && $tipoDocumento->tipo_movimiento_id) {
+
+                Movimiento::create([
+                    'empresa_id'         => $documento->empresa_id,
+                    'usuario_id'         => auth()->id(),
+                    'tipo_movimiento_id' => $tipoDocumento->tipo_movimiento_id,
+                    'documento_id'       => $documento->id,
+                    'tercero_id'         => $documento->tercero_id ?? null,
+                    'fecha'              => now(),
+                    'monto'              => $documento->total,
+                    'descripcion'        => 'Pago documento #' . $documento->id,
+                    'estado'             => 'confirmado'
+                ]);
+            }
+
+            $documento->update([
+                'estado' => 'pagado'
+            ]);
+
+            return redirect()->route('documentos.index')
+                ->with('success', 'Documento pagado correctamente.');
+        });
     }
 }
