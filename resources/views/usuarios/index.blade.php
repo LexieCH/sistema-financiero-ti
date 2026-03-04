@@ -82,43 +82,140 @@
         </table>
     </div>
 
-    {{-- MODAL --}}
+    {{-- MODAL CREAR USUARIO --}}
     <div id="modalUsuario" class="modal-overlay">
+
         <div class="modal-box">
-            <div class="modal-header">
-                <div class="modal-title">Registrar nuevo usuario</div>
-                <button class="modal-close" onclick="cerrarModal()">
-                    <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>Nombre completo <span style="color:var(--red)">*</span></label>
-                    <input type="text" class="form-control" placeholder="Nombre del usuario">
+
+            <form method="POST" action="{{ route('usuarios.store') }}">
+            @csrf
+
+                <div class="modal-header">
+                    <div class="modal-title">Registrar nuevo usuario</div>
+
+                    <button type="button" class="modal-close" onclick="cerrarModal()">
+                        <svg viewBox="0 0 24 24">
+                            <line x1="18" y1="6" x2="6" y2="18"/>
+                            <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                    </button>
                 </div>
-                <div class="form-group">
-                    <label>Correo electrónico <span style="color:var(--red)">*</span></label>
-                    <input type="email" class="form-control" placeholder="correo@empresa.cl">
+
+
+                <div class="modal-body">
+
+                    {{-- Nombre --}}
+                    <div class="form-group">
+                        <label>Nombre completo <span style="color:var(--red)">*</span></label>
+
+                        <input
+                            type="text"
+                            name="name"
+                            class="form-control"
+                            placeholder="Nombre del usuario"
+                            required
+                        >
+                    </div>
+
+
+                    {{-- Email --}}
+                    <div class="form-group">
+                        <label>Correo electrónico <span style="color:var(--red)">*</span></label>
+
+                        <input
+                            type="email"
+                            name="email"
+                            class="form-control"
+                            placeholder="correo@empresa.cl"
+                            required
+                        >
+                    </div>
+
+
+                    {{-- Password --}}
+                    <div class="form-group">
+                        <label>Contraseña <span style="color:var(--red)">*</span></label>
+
+                        <input
+                            type="password"
+                            name="password"
+                            class="form-control"
+                            placeholder="Contraseña"
+                            required
+                        >
+                    </div>
+
+
+                    {{-- Rol --}}
+                    <div class="form-group">
+                        <label>Rol <span style="color:var(--red)">*</span></label>
+
+                        <select name="rol_id" class="form-control" required>
+
+                            <option value="">
+                                — Seleccionar rol —
+                            </option>
+
+                            @foreach($roles as $rol)
+
+                                <option value="{{ $rol->id }}">
+                                    {{ $rol->nombre }}
+                                </option>
+
+                            @endforeach
+
+                        </select>
+                    </div>
+
+
+                    {{-- Empresa --}}
+                    <div class="form-group">
+                        <label>Empresa</label>
+
+                        <select name="empresa_id" class="form-control">
+
+                            <option value="">
+                                — Seleccionar empresa —
+                            </option>
+
+                            @foreach($empresas as $empresa)
+
+                                <option value="{{ $empresa->id }}">
+                                    {{ $empresa->nombre_fantasia }}
+                                </option>
+
+                            @endforeach
+
+                        </select>
+                    </div>
+
                 </div>
-                <div class="form-group">
-                    <label>Rol <span style="color:var(--red)">*</span></label>
-                    <select class="form-control">
-                        <option value="">— Seleccionar rol —</option>
-                    </select>
+
+
+                <div class="modal-footer">
+
+                    <button
+                        type="button"
+                        onclick="cerrarModal()"
+                        class="btn-cancel"
+                    >
+                        Cancelar
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="btn-save"
+                    >
+                        Guardar usuario
+                    </button>
+
                 </div>
-                <div class="form-group">
-                    <label>Empresa</label>
-                    <select class="form-control">
-                        <option value="">— Seleccionar empresa —</option>
-                    </select>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button onclick="cerrarModal()" class="btn-cancel">Cancelar</button>
-                <button class="btn-save">Guardar usuario</button>
-            </div>
+
+            </form>
+
         </div>
-    </div>
+
+</div>
 
     <script>
     function abrirModal()  { document.getElementById('modalUsuario').classList.add('open'); }

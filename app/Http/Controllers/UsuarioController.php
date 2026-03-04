@@ -2,47 +2,64 @@
 
 namespace App\Http\Controllers;
 
-
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Empresa;
 use App\Models\Rol;
 
-
 class UsuarioController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Listado de usuarios
      */
-
     public function index()
     {
-        if(auth()->user()->rol->nombre !== 'System Admin'){
-        abort(403, 'No autorizado');
+        if (auth()->user()->rol->nombre !== 'Admin') {
+            abort(403, 'No autorizado');
         }
-        $usuarios = User::with(['empresa','rol'])->get();
-        $empresas = Empresa::where('estado','activa')->get();
-        $roles = Rol::where('estado','activo')->get();
 
-        return view('usuarios.index', compact('usuarios','empresas','roles'));
+        $usuarios = User::with(['empresa', 'rol'])
+            ->orderBy('name')
+            ->get();
+
+        $empresas = Empresa::where('estado', 'activa')->get();
+
+        $roles = Rol::where('estado', 'activo')->get();
+
+        return view('usuarios.index', compact(
+            'usuarios',
+            'empresas',
+            'roles'
+        ));
     }
 
+
     /**
-     * Show the form for creating a new resource.
+     * Formulario de creación
      */
     public function create()
     {
         //
     }
 
+
     /**
-     * Store a newly created resource in storage.
+     * Crear usuario
      */
     public function store(Request $request)
     {
-        if(auth()->user()->rol->nombre !== 'System Admin'){
-        abort(403, 'No autorizado');
+        if (auth()->user()->rol->nombre !== 'Admin') {
+            abort(403, 'No autorizado');
         }
+
+        $request->validate([
+            'name' => 'required|string|max:100',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|min:6',
+            'rol_id' => 'required|exists:rols,id',
+            'empresa_id' => 'nullable|exists:empresas,id'
+        ]);
+
         User::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -52,58 +69,78 @@ class UsuarioController extends Controller
             'estado' => 'activo'
         ]);
 
-        return redirect()->route('usuarios.index')->with('success','Usuario creado');
+        return redirect()
+            ->route('usuarios.index')
+            ->with('success', 'Usuario creado correctamente');
     }
 
     /**
-     * Display the specified resource.
+     * Mostrar usuario
      */
     public function show(string $id)
     {
         //
     }
 
+
     /**
-     * Show the form for editing the specified resource.
+     * Editar usuario
      */
     public function edit(string $id)
     {
         //
     }
 
+
     /**
-     * Update the specified resource in storage.
+     * Actualizar usuario
      */
     public function update(Request $request, string $id)
     {
-        if(auth()->user()->rol->nombre !== 'System Admin'){
-        abort(403, 'No autorizado');
+        if (auth()->user()->rol->nombre !== 'Admin') {
+            abort(403, 'No autorizado');
+        }
+
+        $usuario = User::findOrFail($id);
+
+        $request->validate([
+            'name' => 'required|string|max:100',
+            'email' => 'required|email|unique:users,email,' . $usuario->id,
+            'rol_id' => 'required|exists:rols,id',
+            'empresa_id' => 'nullable|exists:empresas,id'
+        ]);
+
+        $usuario->update([
+            'name' => $request->name,
+            'email' => $request->email,
+            'empresa_id' => $request->empresa_id,
+            'rol_id' => $request->rol_id,
+            'estado' => $request->estado
+        ]);
+
+        return redirect()
+            ->route('usuarios.index')
+            ->with('success', 'Usuario actualizado');
     }
-    $usuario = User::findOrFail($id);
 
-    $usuario->update([
-        'name' => $request->name,
-        'email' => $request->email,
-        'empresa_id' => $request->empresa_id,
-        'rol_id' => $request->rol_id,
-        'estado' => $request->estado
-    ]);
-
-    return redirect()->route('usuarios.index')->with('success','Usuario actualizado');
-}
 
     /**
-     * Remove the specified resource from storage.
+     * Desactivar usuario
      */
     public function destroy(string $id)
     {
-        if(auth()->user()->rol->nombre !== 'System Admin'){
-        abort(403, 'No autorizado');
+        if (auth()->user()->rol->nombre !== 'Admin') {
+            abort(403, 'No autorizado');
         }
+
         $usuario = User::findOrFail($id);
+
         $usuario->estado = 'inactivo';
+
         $usuario->save();
 
-        return redirect()->route('usuarios.index')->with('success','Usuario desactivado');
+        return redirect()
+            ->route('usuarios.index')
+            ->with('success', 'Usuario desactivado');
     }
 }

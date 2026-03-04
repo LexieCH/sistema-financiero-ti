@@ -3,34 +3,28 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\Rol;
+use Illuminate\Support\Facades\DB;
 
 class RolSeeder extends Seeder
 {
     public function run(): void
     {
-        Rol::create([
-            'nombre'=>'System Admin',
-            'descripcion'=>'Administrador principal del sistema',
-            'estado'=>'activo'
-        ]);
-
-        Rol::create([
-            'nombre'=>'Admin Empresa',
-            'descripcion'=>'Administra su empresa',
-            'estado'=>'activo'
-        ]);
-
-        Rol::create([
-            'nombre'=>'Contador',
-            'descripcion'=>'Gestiona movimientos financieros',
-            'estado'=>'activo'
-        ]);
-
-        Rol::create([
-            'nombre'=>'Usuario',
-            'descripcion'=>'Usuario básico del sistema',
-            'estado'=>'activo'
+        DB::table('rols')->insert([
+            [
+                'nombre' => 'Admin',
+                'descripcion' => 'Administrador del sistema',
+                'estado' => 'activo'
+            ],
+            [
+                'nombre' => 'Contador',
+                'descripcion' => 'Gestión financiera',
+                'estado' => 'activo'
+            ],
+            [
+                'nombre' => 'Solo lectura',
+                'descripcion' => 'Acceso de consulta',
+                'estado' => 'activo'
+            ]
         ]);
     }
 }

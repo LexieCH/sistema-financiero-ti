@@ -89,16 +89,21 @@ class MovimientoController extends Controller
 
 
         Movimiento::create([
-            'empresa_id' => Auth::user()->empresa_id,
-            'usuario_id' => Auth::id(),
+    
+            'empresa_id' => auth()->user()->empresa_id,
+            
             'tipo_movimiento_id' => $request->tipo_movimiento_id,
-            'categoria_id' => $request->categoria_id,
-            'metodo_pago_id' => $request->metodo_pago_id,
+            
             'tercero_id' => $request->tercero_id,
-            'monto' => $monto,
+            
+            'monto' => $request->monto,
+            
             'fecha' => $request->fecha,
+            
             'descripcion' => $request->descripcion,
-            'estado' => 'confirmado'
+            
+            'usuario_id' => auth()->id()
+
         ]);
 
         return redirect()->route('movimientos.index')

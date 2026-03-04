@@ -10,11 +10,27 @@ class EmpresaSeeder extends Seeder
     public function run(): void
     {
         Empresa::create([
-            'rut_empresa' => '11111111-1',
-            'nombre_fantasia' => 'Ingeniería y Soporte TI',
-            'razon_social' => 'Ingeniería y Soporte TI Chile Ltda',
+            'rut_empresa' => '77.123.456-7',
+            'nombre_fantasia' => 'TCVIT',
+            'razon_social' => 'TCVIT SpA',
+            'direccion' => 'Concepción',
+            'telefono' => '412345678',
+            'email' => 'contacto@TCVIT.cl',
+            'giro' => 'Informatica',
+            'estado' => 'activa',
+            'creada_por' => null
+        ]);
+
+        Empresa::create([
+            'rut_empresa' => '76.999.888-5',
+            'nombre_fantasia' => 'Ingeniería y Soporte Chile',
+            'razon_social' => 'Ingeniería y Soporte Chile Ltda',
+            'direccion' => 'Santiago',
+            'telefono' => '221234567',
+            'email' => 'contacto@soporte.cl',
             'giro' => 'Servicios informáticos',
-            'estado' => 'activa'
+            'estado' => 'activa',
+            'creada_por' => null
         ]);
     }
 }
