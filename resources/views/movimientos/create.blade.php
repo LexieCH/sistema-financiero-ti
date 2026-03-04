@@ -1,99 +1,105 @@
 <x-app-layout>
-<x-slot name="header">
-    <span class="text-gray-800 font-semibold">Nuevo Movimiento</span>
-</x-slot>
+    <x-slot name="header">Nuevo Movimiento</x-slot>
 
-<div class="max-w-4xl mx-auto">
-
-    <!-- TITULO -->
-    <div class="mb-6">
-        <h1 class="text-2xl font-bold text-gray-800">
-            Registrar movimiento financiero
-        </h1>
-        <p class="text-sm text-gray-500">
-            Ingresa ingresos o egresos del sistema
-        </p>
+    <div class="page-header">
+        <h2>Registrar movimiento financiero</h2>
+        <p>Complete los campos para registrar un ingreso o egreso en el sistema</p>
     </div>
 
-    <!-- CARD -->
-    <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-6">
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">Datos del movimiento</div>
+        </div>
 
         <form method="POST" action="{{ route('movimientos.store') }}">
             @csrf
 
-            <div class="grid grid-cols-2 gap-4">
+            <div class="form-grid">
 
-                <!-- tipo -->
-                <div>
-                    <label class="text-sm">Tipo movimiento</label>
-                    <select name="tipo_movimiento_id" class="w-full border rounded px-3 py-2 mt-1" required>
+                <div class="form-group">
+                    <label>Tipo de movimiento <span style="color:var(--red)">*</span></label>
+                    <select name="tipo_movimiento_id" class="form-control" required>
                         @foreach($tipos as $tipo)
-                        <option value="{{ $tipo->id }}">{{ $tipo->nombre }}</option>
+                            <option value="{{ $tipo->id }}" {{ old('tipo_movimiento_id') == $tipo->id ? 'selected' : '' }}>
+                                {{ $tipo->nombre }}
+                            </option>
                         @endforeach
                     </select>
+                    @error('tipo_movimiento_id')
+                        <span style="font-size:11px;color:var(--red);margin-top:4px;display:block;">{{ $message }}</span>
+                    @enderror
                 </div>
 
-                <!-- categoria -->
-                <div>
-                    <label class="text-sm">Categoría</label>
-                    <select name="categoria_id" class="w-full border rounded px-3 py-2 mt-1" required>
+                <div class="form-group">
+                    <label>Categoría <span style="color:var(--red)">*</span></label>
+                    <select name="categoria_id" class="form-control" required>
                         @foreach($categorias as $categoria)
-                        <option value="{{ $categoria->id }}">{{ $categoria->nombre }}</option>
+                            <option value="{{ $categoria->id }}" {{ old('categoria_id') == $categoria->id ? 'selected' : '' }}>
+                                {{ $categoria->nombre }}
+                            </option>
                         @endforeach
                     </select>
+                    @error('categoria_id')
+                        <span style="font-size:11px;color:var(--red);margin-top:4px;display:block;">{{ $message }}</span>
+                    @enderror
                 </div>
 
-                <!-- metodo -->
-                <div>
-                    <label class="text-sm">Método pago</label>
-                    <select name="metodo_pago_id" class="w-full border rounded px-3 py-2 mt-1">
+                <div class="form-group">
+                    <label>Método de pago</label>
+                    <select name="metodo_pago_id" class="form-control">
                         @foreach($metodos as $metodo)
-                        <option value="{{ $metodo->id }}">{{ $metodo->nombre }}</option>
+                            <option value="{{ $metodo->id }}" {{ old('metodo_pago_id') == $metodo->id ? 'selected' : '' }}>
+                                {{ $metodo->nombre }}
+                            </option>
                         @endforeach
                     </select>
                 </div>
 
-                <!-- tercero -->
-                <div>
-                    <label class="text-sm">Cliente / Proveedor</label>
-                    <select name="tercero_id" class="w-full border rounded px-3 py-2 mt-1">
-                        <option value="">Opcional</option>
+                <div class="form-group">
+                    <label>Cliente / Proveedor</label>
+                    <select name="tercero_id" class="form-control">
+                        <option value="">— Seleccionar (opcional) —</option>
                         @foreach($terceros as $tercero)
-                        <option value="{{ $tercero->id }}">{{ $tercero->razon_social }}</option>
+                            <option value="{{ $tercero->id }}" {{ old('tercero_id') == $tercero->id ? 'selected' : '' }}>
+                                {{ $tercero->razon_social }}
+                            </option>
                         @endforeach
                     </select>
                 </div>
 
-                <!-- monto -->
-                <div>
-                    <label class="text-sm">Monto</label>
-                    <input type="number" step="0.01" name="monto" class="w-full border rounded px-3 py-2 mt-1" required>
+                <div class="form-group">
+                    <label>Monto (CLP $) <span style="color:var(--red)">*</span></label>
+                    <input type="number" step="0.01" name="monto" class="form-control"
+                           placeholder="0" value="{{ old('monto') }}" required>
+                    @error('monto')
+                        <span style="font-size:11px;color:var(--red);margin-top:4px;display:block;">{{ $message }}</span>
+                    @enderror
                 </div>
 
-                <!-- fecha -->
-                <div>
-                    <label class="text-sm">Fecha</label>
-                    <input type="datetime-local" name="fecha"max="{{ now()->format('Y-m-d\TH:i') }}" onchange="this.blur()" class="w-full border rounded px-3 py-2 mt-1"
-required>
+                <div class="form-group">
+                    <label>Fecha y hora <span style="color:var(--red)">*</span></label>
+                    <input type="datetime-local" name="fecha" class="form-control"
+                           max="{{ now()->format('Y-m-d\TH:i') }}"
+                           value="{{ old('fecha') }}" required>
+                    @error('fecha')
+                        <span style="font-size:11px;color:var(--red);margin-top:4px;display:block;">{{ $message }}</span>
+                    @enderror
                 </div>
 
-                <!-- descripción -->
-                <div class="col-span-2">
-                    <label class="text-sm">Descripción</label>
-                    <textarea name="descripcion" class="w-full border rounded px-3 py-2 mt-1"></textarea>
+                <div class="form-group form-col-2">
+                    <label>Descripción</label>
+                    <textarea name="descripcion" class="form-control" rows="3"
+                              placeholder="Descripción detallada del movimiento...">{{ old('descripcion') }}</textarea>
                 </div>
 
             </div>
 
-            <div class="mt-6 text-right">
-                <button class="bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800">
-                    Guardar movimiento
-                </button>
+            <div class="form-footer">
+                <a href="{{ route('movimientos.index') }}" class="btn-cancel">Cancelar</a>
+                <button type="submit" class="btn-save">Guardar movimiento</button>
             </div>
 
         </form>
-
     </div>
 
-</div>
 </x-app-layout>
