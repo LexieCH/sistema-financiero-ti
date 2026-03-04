@@ -11,6 +11,7 @@ use App\Models\Empresa;
 use App\Models\Tercero;
 use App\Models\User;
 use App\Models\Movimiento;
+use App\Models\Pago;
 
 class Documento extends Model
 {
@@ -57,5 +58,21 @@ class Documento extends Model
     {
         return $this->hasMany(Movimiento::class);
     }
+
+    public function pagos()
+    {
+        return $this->hasMany(Pago::class);
+    }
+
+    public function totalPagado()
+    {
+        return $this->pagos()->sum('monto');
+    }
+
+    public function saldoPendiente()
+    {
+        return $this->total - $this->totalPagado();
+    }
+
 }
 
