@@ -12,13 +12,18 @@ class Tercero extends Model
     protected $table = 'terceros';
 
     protected $fillable = [
+
         'empresa_id',
-        'tipo',          // cliente, proveedor, ambos
+        'razon_social',
         'rut',
-        'nombre',
         'telefono',
         'email',
         'direccion',
+
+        'banco',
+        'tipo_cuenta',
+        'numero_cuenta',
+
         'estado'
     ];
 

@@ -30,7 +30,7 @@ return new class extends Migration
             $table->foreignId('metodo_pago_id')->nullable()->constrained('metodo_pagos');
 
             // centro costo
-            $table->foreignId('centro_costo_id')->nullable()->constrained('centro_costos');
+            $table->foreignId('centro_costo_id')->nullable()->constrained('centro_costos')->nullOnDelete();
 
             // socio (solo si es retiro/aporte)
             $table->foreignId('socio_id')->nullable()->constrained('socios');

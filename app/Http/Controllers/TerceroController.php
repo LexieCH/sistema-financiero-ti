@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Documento;
+use App\Models\Movimiento;
 use App\Models\Tercero;
 use Illuminate\Http\Request;
 
@@ -34,13 +36,20 @@ class TerceroController extends Controller
     public function store(Request $request)
 {
     $request->validate([
-        'razon_social' => 'required|string|max:200',
-        'rut'          => 'nullable|string|max:20',
-        'tipo'         => 'required|in:cliente,proveedor,ambos',
+
+        'razon_social' => 'required|string|max:255',
+        'rut' => 'required|string|max:20',
+        'telefono' => 'nullable|string|max:20',
+        'email' => 'nullable|email',
+
+        'banco' => 'nullable|string|max:100',
+        'tipo_cuenta' => 'nullable|string|max:50',
+        'numero_cuenta' => 'nullable|string|max:50'
+
     ]);
 
     Tercero::create([
-        'empresa_id'   => 1, // 🔥 temporal
+        'empresa_id'   => 1, // temporal
         'razon_social' => $request->razon_social,
         'rut'          => $request->rut,
         'tipo'         => $request->tipo,
@@ -57,9 +66,25 @@ class TerceroController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show($id)
     {
-        //
+        $tercero = Tercero::findOrFail($id);
+
+        // documentos asociados al tercero
+        $documentos = Documento::where('tercero_id', $id)->get();
+
+        // movimientos asociados
+        $movimientos = Movimiento::where('tercero_id', $id)->get();
+
+        // total facturado
+        $totalFacturado = Documento::where('tercero_id', $id)->sum('total');
+
+        return view('terceros.show', compact(
+            'tercero',
+            'documentos',
+            'movimientos',
+            'totalFacturado'
+        ));
     }
 
     /**

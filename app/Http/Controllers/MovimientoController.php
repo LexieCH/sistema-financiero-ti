@@ -90,7 +90,7 @@ class MovimientoController extends Controller
 
         Movimiento::create([
     
-            'empresa_id' => auth()->user()->empresa_id,
+            'empresa_id' => Auth::user()->empresa_id,
             
             'tipo_movimiento_id' => $request->tipo_movimiento_id,
             

@@ -58,10 +58,23 @@
                     </td>
 
                     <td style="display:flex;gap:6px;">
+
+                        <a href="{{ route('terceros.show', $tercero->id) }}" class="btn-sm success">
+                            <svg viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="3"/>
+                                <path d="M2.05 12a10 10 0 0119.9 0 10 10 0 01-19.9 0z"/>
+                            </svg>
+                            Ver más
+                        </a>
+
                         <button class="btn-sm">
-                            <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            <svg viewBox="0 0 24 24">
+                                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                            </svg>
                             Editar
                         </button>
+
                     </td>
                 </tr>
                 @endforeach
@@ -78,6 +91,9 @@
                     <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
             </div>
+            <form method="POST" action="{{ route('terceros.store') }}">
+            @csrf
+
             <div class="modal-body">
                 <div class="form-group">
                     <label>Razón social <span style="color:var(--red)">*</span></label>
@@ -85,7 +101,12 @@
                 </div>
                 <div class="form-group">
                     <label>RUT <span style="color:var(--red)">*</span></label>
-                    <input type="text" class="form-control" placeholder="Ej: 12.345.678-9">
+                    <input type="text"
+                            id="rut"
+                            name="rut"
+                            class="form-control"
+                            placeholder="Ej: 11111111-1"
+                            required>
                 </div>
                 <div class="form-group">
                     <label>Tipo <span style="color:var(--red)">*</span></label>
@@ -94,22 +115,51 @@
                         <option value="proveedor">Proveedor</option>
                     </select>
                 </div>
+                <div class="form-group">
+                    <label>Banco</label>
+                    <input type="text" name="banco" class="form-control" placeholder="Ej: Banco Estado">
+                </div>
+
+                <div class="form-group">
+                    <label>Tipo de cuenta</label>
+                    <select name="tipo_cuenta" class="form-control">
+                        <option value="">Seleccione</option>
+                        <option value="corriente">Cuenta corriente</option>
+                        <option value="vista">Cuenta vista</option>
+                        <option value="ahorro">Cuenta de ahorro</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Número de cuenta</label>
+                    <input type="text" name="numero_cuenta" class="form-control" placeholder="Número de cuenta">
+                </div>
             </div>
             <div class="modal-footer">
-                <button onclick="cerrarModal()" class="btn-cancel">Cancelar</button>
-                <button class="btn-save">Guardar</button>
+                <button type="button" onclick="cerrarModal()" class="btn-cancel">Cancelar</button>
+                <button type="submit" class="btn-save">Guardar</button>
             </div>
+            </form>
         </div>
     </div>
 
     <script>
-    function abrirModal()  { document.getElementById('modalTercero').classList.add('open'); }
-    function cerrarModal() { document.getElementById('modalTercero').classList.remove('open'); }
+
+    function abrirModal()  { 
+        document.getElementById('modalTercero').classList.add('open'); 
+    }
+
+    function cerrarModal() { 
+        document.getElementById('modalTercero').classList.remove('open'); 
+    }
+
     document.getElementById('modalTercero').addEventListener('click', function(e) {
         if (e.target === this) cerrarModal();
     });
 
+
     $(document).ready(function () {
+
         var dt = $('#tablaTerceros').DataTable({
             pageLength: 10,
             language: {
@@ -121,8 +171,42 @@
             dom: 'tip',
             columnDefs: [{ orderable: false, targets: -1 }],
         });
-        $('#search-ter').on('keyup', function () { dt.search(this.value).draw(); });
+
+        $('#search-ter').on('keyup', function () { 
+            dt.search(this.value).draw(); 
+        });
+
     });
+
+
+    // NORMALIZAR RUT AUTOMÁTICAMENTE
+    const rutInput = document.getElementById('rut');
+
+    if (rutInput) {
+
+        rutInput.addEventListener('input', function () {
+
+            let valor = this.value;
+
+            // eliminar puntos y guiones
+            valor = valor.replace(/\./g, '').replace(/-/g, '');
+
+            if (valor.length > 1) {
+
+                let cuerpo = valor.slice(0, -1);
+                let dv = valor.slice(-1).toUpperCase();
+
+                this.value = cuerpo + '-' + dv;
+
+            } else {
+                this.value = valor;
+            }
+
+        });
+
+    }
+
     </script>
+        
 
 </x-app-layout>

@@ -9,6 +9,7 @@ use App\Http\Controllers\MovimientoController;
 use App\Http\Controllers\TerceroController;
 use App\Http\Controllers\DocumentoController;
 use App\Http\Controllers\PagoController;
+use App\Http\Controllers\CentroCostoController;
 
 
 // Redirección inicial
@@ -69,6 +70,10 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('pagos', PagoController::class)
         ->only(['index'])
+        ->middleware('rol:Admin,Contador');
+
+    //Centro Costos 
+    Route::resource('centros-costos', CentroCostoController::class)
         ->middleware('rol:Admin,Contador');
 
 });
