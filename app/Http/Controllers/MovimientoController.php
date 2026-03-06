@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Movimiento;
 use App\Models\Categoria;
+use App\Models\CentroCosto;
 use App\Models\MetodoPago;
 use App\Models\TipoMovimiento;
 use App\Models\Tercero;
@@ -16,7 +17,7 @@ class MovimientoController extends Controller
 {
     
     public function index()
-{
+    {
         $empresaId = Auth::user()->empresa_id;
 
         $movimientos = Movimiento::with(['tipoMovimiento','categoria','usuario'])
@@ -45,6 +46,15 @@ class MovimientoController extends Controller
 
         $saldoHoy = $ingresosHoy - $egresosHoy;
 
+        $gastosCentroCosto = Movimiento::where('empresa_id',$empresaId)
+            ->whereHas('tipoMovimiento', function($q){
+                $q->where('naturaleza','egreso');
+            })
+            ->selectRaw('centro_costo_id, SUM(monto) as total')
+            ->groupBy('centro_costo_id')
+            ->with('centroCosto')
+            ->get();
+
         return view('movimientos.index', compact(
             'movimientos',
             'ingresosHoy',
@@ -65,6 +75,7 @@ class MovimientoController extends Controller
             'categorias' => Categoria::where('empresa_id',$empresaId)->get(),
             'metodos' => MetodoPago::where('empresa_id',$empresaId)->get(),
             'terceros' => Tercero::where('empresa_id',$empresaId)->get(),
+            'centros' => CentroCosto::where('empresa_id',$empresaId)->get(),
         ]);
     }
 
@@ -73,35 +84,41 @@ class MovimientoController extends Controller
      */
     public function store(Request $request)
     {
-            $request->validate([
+        $request->validate([
             'tipo_movimiento_id' => 'required',
             'categoria_id' => 'required',
+            'centro_costo_id' => 'nullable|exists:centro_costos,id',
             'monto' => 'required',
             'fecha' => 'required'
-            
         ]);
-        
+
         $monto = str_replace('.', '', $request->monto);
         $monto = str_replace(',', '.', $monto);
 
         if(!is_numeric($monto) || $monto <= 0){
-        return back()->withErrors(['monto' => 'Monto inválido']);}
-
+            return back()->withErrors(['monto' => 'Monto inválido']);
+        }
 
         Movimiento::create([
-    
+
             'empresa_id' => Auth::user()->empresa_id,
-            
+
             'tipo_movimiento_id' => $request->tipo_movimiento_id,
-            
+
+            'categoria_id' => $request->categoria_id,
+
+            'metodo_pago_id' => $request->metodo_pago_id,
+
+            'centro_costo_id' => $request->centro_costo_id, 
+
             'tercero_id' => $request->tercero_id,
-            
-            'monto' => $request->monto,
-            
+
+            'monto' => $monto, 
+
             'fecha' => $request->fecha,
-            
+
             'descripcion' => $request->descripcion,
-            
+
             'usuario_id' => auth()->id()
 
         ]);

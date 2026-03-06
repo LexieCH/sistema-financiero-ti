@@ -140,7 +140,51 @@
 
     </div>
 
+    {{-- CENTROS DE COSTO --}}
+        <div class="card">
 
+            <div class="card-title">
+                Gastos por Centro de Costo
+            </div>
+
+            <table style="width:100%">
+
+                <thead>
+                    <tr>
+                        <th>Centro de costo</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                @forelse($gastosCentroCosto as $g)
+
+                    <tr>
+                        <td>
+                            {{ $g->centroCosto->nombre ?? 'Sin centro' }}
+                        </td>
+
+                        <td>
+                            ${{ number_format($g->total,0,',','.') }}
+                        </td>
+                    </tr>
+
+                @empty
+
+                    <tr>
+                        <td colspan="2" style="text-align:center;color:var(--muted)">
+                            No hay gastos registrados por centro de costo
+                        </td>
+                    </tr>
+
+                @endforelse
+
+                </tbody>
+
+            </table>
+
+        </div>
     {{-- TABLA --}}
     <div class="card">
 

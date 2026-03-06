@@ -58,7 +58,25 @@
                     @enderror
 
                 </div>
+                {{-- centro de costos  --}}
 
+                <div class="form-group">
+
+                    <label>Centro de costo</label>
+
+                    <select name="centro_costo_id" class="form-control">
+
+                    <option value="">Seleccione</option>
+
+                    @foreach($centros as $centro)
+                    <option value="{{ $centro->id }}">
+                    {{ $centro->nombre }}
+                    </option>
+                    @endforeach
+
+                    </select>
+
+                    </div>
 
                 {{-- TERCERO --}}
                 <div class="form-group">

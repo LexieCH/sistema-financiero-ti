@@ -9,6 +9,8 @@ use App\Models\Categoria;
 use App\Models\User;
 use App\Models\Socio;
 use App\Models\CentroCosto;
+use App\Models\Tercero;
+use App\Models\MetodoPago;
 
 class Movimiento extends Model
 {
@@ -56,4 +58,14 @@ class Movimiento extends Model
     public function centroCosto(){
         return $this->belongsTo(CentroCosto::class);
     }
+
+    public function tercero(){
+        return $this->belongsTo(Tercero::class);
+    }
+
+    public function metodoPago(){
+        return $this->belongsTo(MetodoPago::class);
+    }
+
+
 }
