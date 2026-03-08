@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Permiso;
 
 class Rol extends Model
 {
@@ -22,5 +23,10 @@ class Rol extends Model
     public function usuarios()
     {
         return $this->hasMany(User::class);
+    }
+
+    public function permisos()
+    {
+        return $this->hasMany(Permiso::class);
     }
 }

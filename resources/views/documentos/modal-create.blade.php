@@ -50,7 +50,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Total</label>
+                    <label class="label-total">Total</label>
 
                     <input type="text"
                         id="total_display"
@@ -63,7 +63,7 @@
             <div style="margin-top:20px">
 
                 <button type="submit" class="btn-save">
-                    Guardar documento
+                    Guardar
                 </button>
 
                 <button type="button"

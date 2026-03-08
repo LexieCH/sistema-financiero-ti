@@ -9,11 +9,12 @@ class CentroCosto extends Model
 {
     use SoftDeletes;
     use HasFactory;
-    
+
     protected $table = 'centro_costos';
     
     protected $fillable = [
         'empresa_id',
+        'proyecto_id',
         'nombre',
         'descripcion',
         'estado'
@@ -24,6 +25,12 @@ class CentroCosto extends Model
     }
 
     public function movimientos(){
-        return $this->hasMany(Movimiento::class);
+        return $this->hasMany(Movimiento::class, 'centro_costo_id');
     }
+
+    public function proyecto()
+    {
+        return $this->belongsTo(Proyecto::class);
+    }
+    
 }

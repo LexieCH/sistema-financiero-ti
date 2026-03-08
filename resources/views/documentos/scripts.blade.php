@@ -1,14 +1,14 @@
 <script>
 
 function abrirModalDocumento(){
-    document.getElementById("modalDocumento").style.display = "block";
+    document.getElementById("modalDocumento").classList.add('open');
 }
 
 function cerrarModalDocumento(){
 
     var modal = document.getElementById("modalDocumento");
 
-    modal.style.display = "none";
+    modal.classList.remove('open');
 
     // limpiar formulario
     document.querySelector("#modalDocumento form").reset();
@@ -27,9 +27,14 @@ function cerrarModalDocumento(){
 window.onclick = function(event){
 
     var modal = document.getElementById("modalDocumento");
+    var modalPago = document.getElementById("modalPago");
 
     if(event.target == modal){
-        modal.style.display = "none";
+        modal.classList.remove('open');
+    }
+
+    if(event.target == modalPago){
+        modalPago.classList.remove('open');
     }
 
 }
@@ -60,7 +65,7 @@ $(document).ready(function(){
 //modal pago
 function abrirModalPago(id){
 
-    document.getElementById("modalPago").style.display="block";
+    document.getElementById("modalPago").classList.add('open');
 
     document.getElementById("pago_documento_id").value=id;
 
@@ -68,7 +73,7 @@ function abrirModalPago(id){
 
     function cerrarModalPago(){
 
-    document.getElementById("modalPago").style.display="none";
+    document.getElementById("modalPago").classList.remove('open');
 
 }
 

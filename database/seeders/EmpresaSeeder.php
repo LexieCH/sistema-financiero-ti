@@ -9,8 +9,9 @@ class EmpresaSeeder extends Seeder
 {
     public function run(): void
     {
-        Empresa::create([
+        Empresa::updateOrCreate([
             'rut_empresa' => '77.123.456-7',
+        ], [
             'nombre_fantasia' => 'TCVIT',
             'razon_social' => 'TCVIT SpA',
             'direccion' => 'Concepción',
@@ -21,8 +22,9 @@ class EmpresaSeeder extends Seeder
             'creada_por' => null
         ]);
 
-        Empresa::create([
+        Empresa::updateOrCreate([
             'rut_empresa' => '76.999.888-5',
+        ], [
             'nombre_fantasia' => 'Ingeniería y Soporte Chile',
             'razon_social' => 'Ingeniería y Soporte Chile Ltda',
             'direccion' => 'Santiago',

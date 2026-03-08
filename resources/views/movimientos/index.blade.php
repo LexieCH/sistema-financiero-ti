@@ -4,8 +4,14 @@
         Movimientos
     </x-slot>
 
+    @php
+        // Si no tiene permiso de crear, no mostramos el botón de nuevo movimiento.
+        $usuarioAuth = Auth::user();
+    @endphp
+
 
     <x-slot name="topbarAction">
+        @if($usuarioAuth->tienePermiso('movimientos', 'crear'))
         <a href="{{ route('movimientos.create') }}" class="btn-primary">
 
             <svg viewBox="0 0 24 24">
@@ -16,6 +22,7 @@
             Nuevo movimiento
 
         </a>
+        @endif
     </x-slot>
 
 
@@ -140,51 +147,6 @@
 
     </div>
 
-    {{-- CENTROS DE COSTO --}}
-        <div class="card">
-
-            <div class="card-title">
-                Gastos por Centro de Costo
-            </div>
-
-            <table style="width:100%">
-
-                <thead>
-                    <tr>
-                        <th>Centro de costo</th>
-                        <th>Total</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-
-                @forelse($gastosCentroCosto as $g)
-
-                    <tr>
-                        <td>
-                            {{ $g->centroCosto->nombre ?? 'Sin centro' }}
-                        </td>
-
-                        <td>
-                            ${{ number_format($g->total,0,',','.') }}
-                        </td>
-                    </tr>
-
-                @empty
-
-                    <tr>
-                        <td colspan="2" style="text-align:center;color:var(--muted)">
-                            No hay gastos registrados por centro de costo
-                        </td>
-                    </tr>
-
-                @endforelse
-
-                </tbody>
-
-            </table>
-
-        </div>
     {{-- TABLA --}}
     <div class="card">
 
@@ -305,17 +267,19 @@
 
 
                     <td>
+                        @if($usuarioAuth->tienePermiso('movimientos', 'editar'))
+                        <a href="{{ route('movimientos.edit', $m->id) }}" class="btn-sm">Editar</a>
+                        @endif
 
-                        <button class="btn-sm">
-
-                            <svg viewBox="0 0 24 24">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                                <circle cx="12" cy="12" r="3"/>
-                            </svg>
-
-                            Ver
-
-                        </button>
+                        @if($usuarioAuth->tienePermiso('movimientos', 'eliminar'))
+                        <form method="POST" action="{{ route('movimientos.destroy', $m->id) }}" style="display:inline;">
+                            @csrf
+                            @method('DELETE')
+                            <button class="btn-sm danger" onclick="return confirm('¿Anular movimiento?')">
+                                Anular
+                            </button>
+                        </form>
+                        @endif
 
                     </td>
 

@@ -6,36 +6,31 @@ use Illuminate\Database\Eloquent\Model;
 
 class TipoDocumento extends Model
 {
-    public function run(): void
+    protected $table = 'tipo_documentos';
+
+    protected $fillable = [
+        'empresa_id',
+        'nombre',
+        'usa_iva',
+        'credito_fiscal',
+        'categoria',
+        'estado',
+        'genera_movimiento',
+        'tipo_movimiento_id',
+    ];
+
+    public function empresa()
     {
-        TipoDocumento::create([
-            'nombre'=>'Factura Emitida',
-            'usa_iva'=>true,
-            'credito_fiscal'=>false,
-            'categoria'=>'venta'   
-        ]);
+        return $this->belongsTo(Empresa::class);
+    }
 
-         TipoDocumento::create([
-            'nombre'=>'Factura Recibida',
-            'usa_iva'=>true,
-            'credito_fiscal'=>true,
-            'categoria'=>'compra'   
-        ]);
+    public function tipoMovimiento()
+    {
+        return $this->belongsTo(TipoMovimiento::class);
+    }
 
-         TipoDocumento::create([
-            'nombre'=>'Nota de Crédito',
-            'usa_iva'=>true,
-            'credito_fiscal'=>true,
-            'categoria'=>'compra'   
-        ]);
-            
-        
-         TipoDocumento::create([
-            'nombre'=>'Nota de débito',
-            'usa_iva'=>false,
-            'credito_fiscal'=>false,
-            'categoria'=>'interno'   
-        
-        ]);
+    public function documentos()
+    {
+        return $this->hasMany(Documento::class);
     }
 }

@@ -3,18 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Models\Documento;
-use App\Models\Movimiento;
 use App\Models\TipoDocumento;
 use App\Models\MetodoPago;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use App\Helpers\BitacoraHelper;
 
 class DocumentoController extends Controller
 {
 
     public function index()
     {
+        // Tomamos la empresa del usuario para mantener todo separado por multiempresa.
         $empresaId = Auth::user()->empresa_id;
 
         $tipos = TipoDocumento::where('empresa_id', $empresaId)
@@ -53,13 +54,13 @@ class DocumentoController extends Controller
     public function store(Request $request)
     {
 
+        // Validamos lo mínimo para que el documento no quede incompleto.
+
         $request->validate([
             'tipo_documento_id' => 'required|exists:tipo_documentos,id',
-            'tercero_id'        => 'required|exists:terceros,id',
             'fecha_emision'     => 'required|date',
             'monto_neto'        => 'required|numeric|min:0',
         ]);
-
 
         DB::beginTransaction();
 
@@ -77,58 +78,31 @@ class DocumentoController extends Controller
                 $total = $request->monto_neto + $iva;
             }
 
-
-            // generar folio automático
+            // El folio se calcula solo para no repetir números en la misma empresa.
             $folio = Documento::where('empresa_id', $empresaId)
-                ->max('folio') + 1;
+                ->max('folio') ?? 0;
+            $folio = $folio + 1;
 
-
-            // 1 Crear documento
+            // Importante: crear documento no crea movimiento automático.
             $documento = Documento::create([
-                'empresa_id'        => $empresaId,
-                'tercero_id'        => $request->tercero_id,
-                'usuario_id'        => Auth::id(),
+                'empresa_id' => $empresaId,
+                'usuario_id' => Auth::id(),
                 'tipo_documento_id' => $request->tipo_documento_id,
-                'folio'             => $folio,
-                'fecha_emision'     => $request->fecha_emision,
+                'folio' => $folio,
+                'fecha_emision' => $request->fecha_emision,
                 'fecha_vencimiento' => $request->fecha_vencimiento,
-                'monto_neto'        => $request->monto_neto,
-                'iva'               => $iva,
-                'total'             => $total,
-                'estado'            => 'pendiente'
+                'monto_neto' => $request->monto_neto,
+                'iva' => $iva,
+                'total' => $total,
+                'estado' => 'pendiente'
             ]);
 
-
-            // 2 Crear movimiento automático si corresponde
-            if ($tipoDocumento->genera_movimiento) {
-
-                Movimiento::create([
-
-                    'empresa_id'         => $empresaId,
-                    'usuario_id'         => Auth::id(),
-
-                    'tipo_movimiento_id' => $tipoDocumento->tipo_movimiento_id,
-
-                    'categoria_id'       => null,
-                    'metodo_pago_id'     => null,
-                    'centro_costo_id'    => null,
-                    'socio_id'           => null,
-
-                    'documento_id'       => $documento->id,
-                    'tercero_id'         => $request->tercero_id,
-
-                    'monto'              => $documento->total,
-                    'fecha'              => now(),
-
-                    'referencia'         => 'DOC-'.$documento->folio,
-
-                    'descripcion'        => 'Movimiento generado por '.$tipoDocumento->nombre,
-
-                    'estado'             => 'confirmado'
-
-                ]);
-            }
-
+            BitacoraHelper::registrar(
+                'Documento',
+                'crear',
+                $documento->id,
+                'Se creó documento folio '.$documento->folio
+            );
 
             DB::commit();
 
@@ -159,6 +133,8 @@ class DocumentoController extends Controller
 
     public function update(Request $request, $id)
     {
+
+        // Editar documento también recalcula IVA y total para mantener consistencia.
 
         $documento = Documento::findOrFail($id);
 
@@ -197,54 +173,16 @@ class DocumentoController extends Controller
     public function destroy($id)
     {
 
+        // Se aplica borrado lógico para no perder historial contable.
+
         $documento = Documento::findOrFail($id);
 
-        $documento->delete(); // soft delete
+        $documento->update([
+            'estado' => 'anulado',
+        ]);
 
         return redirect()->route('documentos.index')
-            ->with('success','Documento eliminado');
-
-    }
-
-
-
-    public function marcarPagado($id)
-    {
-
-        return DB::transaction(function () use ($id) {
-
-            $documento = Documento::with('tipoDocumento')->findOrFail($id);
-
-            if ($documento->estado === 'pagado') {
-                return redirect()->route('documentos.index')
-                    ->with('error', 'El documento ya está pagado.');
-            }
-
-            $tipoDocumento = $documento->tipoDocumento;
-
-            if ($tipoDocumento->genera_movimiento && $tipoDocumento->tipo_movimiento_id) {
-
-                Movimiento::create([
-                    'empresa_id'         => $documento->empresa_id,
-                    'usuario_id'         => auth()->id(),
-                    'tipo_movimiento_id' => $tipoDocumento->tipo_movimiento_id,
-                    'documento_id'       => $documento->id,
-                    'tercero_id'         => $documento->tercero_id ?? null,
-                    'fecha'              => now(),
-                    'monto'              => $documento->total,
-                    'descripcion'        => 'Pago documento #' . $documento->id,
-                    'estado'             => 'confirmado'
-                ]);
-            }
-
-            $documento->update([
-                'estado' => 'pagado'
-            ]);
-
-            return redirect()->route('documentos.index')
-                ->with('success', 'Documento pagado correctamente.');
-
-        });
+            ->with('editado','Documento anulado correctamente');
 
     }
 

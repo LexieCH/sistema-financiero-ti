@@ -1,8 +1,15 @@
-<div id="modalPago" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
+<div id="modalPago" class="modal-overlay">
 
-    <div style="background:white; max-width:500px; margin:100px auto; padding:20px; border-radius:8px;">
+    <div class="modal-box" style="max-width:500px;">
 
-        <h3>Registrar pago</h3>
+        <div class="modal-header">
+            <div class="modal-title">Registrar pago</div>
+            <button type="button" class="modal-close" onclick="cerrarModalPago()">
+                <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+
+        <div class="modal-body">
 
         <form method="POST" action="{{ route('pagos.store') }}">
         @csrf
@@ -36,10 +43,10 @@
             <textarea name="observacion" class="form-control"></textarea>
         </div>
 
-        <div style="margin-top:20px">
+        <div class="modal-footer" style="margin-top:20px">
 
             <button type="submit" class="btn-save">
-                Registrar pago
+                Guardar
             </button>
 
             <button type="button" onclick="cerrarModalPago()">
@@ -49,6 +56,8 @@
         </div>
 
         </form>
+
+        </div>
 
     </div>
 

@@ -1,6 +1,11 @@
 <x-app-layout>
     <x-slot name="header">Usuarios</x-slot>
 
+    @php
+        // Lo dejamos en variable para usar permisos sin repetir tanto código.
+        $usuarioAuth = Auth::user();
+    @endphp
+
     <div class="page-header">
         <h2>Gestión de Usuarios</h2>
         <p>Administra los usuarios y sus permisos en el sistema</p>
@@ -14,10 +19,12 @@
                     <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                     <input class="search-input" id="search-usr" placeholder="Buscar usuario...">
                 </div>
+                @if($usuarioAuth->tienePermiso('usuarios', 'crear'))
                 <button onclick="abrirModal()" class="btn-primary" style="font-size:12px;padding:7px 14px;">
                     <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                     Nuevo usuario
                 </button>
+                @endif
             </div>
         </div>
 
@@ -66,6 +73,11 @@
                     </td>
 
                     <td>
+                        @if($usuarioAuth->tienePermiso('usuarios', 'editar'))
+                        <a href="{{ route('usuarios.edit', $usuario->id) }}" class="btn-sm" style="margin-right:6px;">Editar</a>
+                        @endif
+
+                        @if($usuarioAuth->tienePermiso('usuarios', 'eliminar'))
                         <form method="POST" action="{{ route('usuarios.destroy', $usuario->id) }}" style="display:inline;">
                             @csrf
                             @method('DELETE')
@@ -75,6 +87,7 @@
                                 Desactivar
                             </button>
                         </form>
+                        @endif
                     </td>
                 </tr>
                 @endforeach
@@ -82,6 +95,7 @@
         </table>
     </div>
 
+    @if($usuarioAuth->tienePermiso('usuarios', 'crear'))
     {{-- MODAL CREAR USUARIO --}}
     <div id="modalUsuario" class="modal-overlay">
 
@@ -206,7 +220,7 @@
                         type="submit"
                         class="btn-save"
                     >
-                        Guardar usuario
+                        Guardar
                     </button>
 
                 </div>
@@ -216,6 +230,7 @@
         </div>
 
 </div>
+    @endif
 
     <script>
     function abrirModal()  { document.getElementById('modalUsuario').classList.add('open'); }

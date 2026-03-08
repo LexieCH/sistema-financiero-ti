@@ -33,6 +33,9 @@ class Movimiento extends Model
         'estado'
     ];
 
+    protected $casts = [
+        'fecha' => 'datetime',
+    ];
             //relaciones 
 
     public function tipoMovimiento(){
@@ -56,7 +59,7 @@ class Movimiento extends Model
     }
 
     public function centroCosto(){
-        return $this->belongsTo(CentroCosto::class);
+        return $this->belongsTo(CentroCosto::class,'centro_costo_id');
     }
 
     public function tercero(){

@@ -66,12 +66,14 @@
 
                     <select name="centro_costo_id" class="form-control">
 
-                    <option value="">Seleccione</option>
+                        <option value="">Seleccione</option>
 
                     @foreach($centros as $centro)
-                    <option value="{{ $centro->id }}">
-                    {{ $centro->nombre }}
+
+                        <option value="{{ $centro->id }}">
+                            {{ $centro->proyecto->nombre ?? 'Sin proyecto' }} - {{ $centro->nombre }}
                     </option>
+
                     @endforeach
 
                     </select>
@@ -188,7 +190,7 @@
                 </a>
 
                 <button type="submit" class="btn-save">
-                    Guardar movimiento
+                    Guardar
                 </button>
 
             </div>

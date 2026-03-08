@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Documento;
 use App\Models\Pago;
 
@@ -12,6 +13,7 @@ class PagoController extends Controller
 
     public function index()
     {
+        // Vista de pagos con métricas simples para control rápido.
         $pagos = Pago::with('documento')
             ->latest()
             ->get();
@@ -33,6 +35,7 @@ class PagoController extends Controller
 
     public function store(Request $request)
     {
+        // Reglas mínimas para registrar un pago válido.
         $request->validate([
             'documento_id' => 'required|exists:documentos,id',
             'metodo_pago_id' => 'required|exists:metodo_pagos,id',
@@ -42,9 +45,10 @@ class PagoController extends Controller
 
         DB::transaction(function () use ($request) {
 
+            // lockForUpdate evita problemas si dos usuarios pagan al mismo tiempo.
             $documento = Documento::lockForUpdate()->findOrFail($request->documento_id);
 
-            // Validaciones críticas
+            // No dejamos pagar documentos anulados.
             if ($documento->estado === 'anulado') {
                 abort(403, 'No se pueden registrar pagos en documentos anulados.');
             }
@@ -55,18 +59,18 @@ class PagoController extends Controller
                 abort(422, 'El monto excede el saldo pendiente.');
             }
 
-            // Crear pago
+            // Si todo está bien, registramos el pago.
             Pago::create([
-                'empresa_id' => auth()->user()->empresa_id,
+                'empresa_id' => Auth::user()->empresa_id,
                 'documento_id' => $documento->id,
-                'usuario_id' => auth()->id(),
+                'usuario_id' => Auth::id(),
                 'metodo_pago_id' => $request->metodo_pago_id,
                 'fecha_pago' => $request->fecha_pago,
                 'monto' => $request->monto,
                 'observacion' => $request->observacion
             ]);
 
-            // Recalcular saldo
+            // Después del pago recalculamos estado del documento.
             $nuevoSaldo = $documento->saldoPendiente();
 
             if ($nuevoSaldo <= 0) {

@@ -1,45 +1,100 @@
-# Sistema Financiero ERP - Laravel
+# Sistema Financiero TI
 
-Sistema financiero multiempresa desarrollado en Laravel para gestión de ingresos, egresos y documentos contables.
+Sistema financiero multiempresa hecho con Laravel.
 
-Proyecto realizado como práctica profesional.
-
-## Tecnologías
-- Laravel 12
+## Requisitos
+- PHP 8.2+
+- Composer00000
+- Node.js + npm
 - MySQL
-- Bootstrap
-- Laravel Breeze
-- Git/GitHub
 
-## Instalación
+## Inicio rápido (modo demo)
 
-Clonar repositorio:
+1. Clonar proyecto
 
-git clone URL_REPO  
-cd sistema-financiero
+```bash
+git clone <URL_DEL_REPO>
+cd sistema-financiero-ti
+```
 
-Instalar dependencias:
+2. Instalar dependencias
 
-composer install  
-npm install  
+```bash
+composer install
+npm install
+```
 
-Copiar .env:
+3. Crear archivo de entorno
 
-cp .env.example .env  
+```bash
+cp .env.example .env
+```
 
-Configurar base de datos en .env
+En Windows PowerShell también puedes usar:
 
-php artisan key:generate  
+```powershell
+copy .env.example .env
+```
 
-## Base de datos
+4. Configurar base de datos en `.env`
 
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=sistema_financiero_ti
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+5. Generar clave y cargar demo
+
+```bash
+php artisan key:generate
 php artisan migrate:fresh --seed
+```
+
+6. Levantar sistema
+
+```bash
+php artisan serve
+```
 
 ## Usuario demo
+- Correo: `admin@sistema.cl`
+- Clave: `123456`
 
-admin@admin.cl  
-12345678
+## Reiniciar demo (limpiar todo)
 
-## Ejecutar sistema
+```bash
+php artisan migrate:fresh --seed
+```
 
-php artisan serve
+## Módulos principales
+- Empresas
+- Usuarios y permisos
+- Terceros
+- Movimientos
+- Documentos
+- Pagos
+- Centros de costos
+- Proyectos
+- Bitácora
+
+## Comandos útiles
+
+```bash
+php artisan optimize:clear
+php artisan config:clear
+php artisan cache:clear
+```
+
+## Problemas comunes
+
+### `php` no se reconoce en PowerShell
+Usa la terminal de Laragon o ejecuta con la ruta completa de `php.exe`.
+
+### Error 419 (Page Expired)
+- Abrir siempre con el mismo dominio (`localhost` o `127.0.0.1`, no mezclar)
+- Limpiar caché de Laravel con los comandos de arriba
+- Borrar cookies del sitio y volver a iniciar sesión

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Empresa;
 use App\Models\Rol;
+use Illuminate\Support\Facades\Auth;
 
 class UsuarioController extends Controller
 {
@@ -14,7 +15,7 @@ class UsuarioController extends Controller
      */
     public function index()
     {
-        if (auth()->user()->rol->nombre !== 'Admin') {
+        if (Auth::user()->rol->nombre !== 'Admin') {
             abort(403, 'No autorizado');
         }
 
@@ -48,7 +49,7 @@ class UsuarioController extends Controller
      */
     public function store(Request $request)
     {
-        if (auth()->user()->rol->nombre !== 'Admin') {
+        if (Auth::user()->rol->nombre !== 'Admin') {
             abort(403, 'No autorizado');
         }
 
@@ -79,7 +80,7 @@ class UsuarioController extends Controller
      */
     public function show(string $id)
     {
-        //
+        return redirect()->route('usuarios.edit', $id);
     }
 
 
@@ -88,7 +89,15 @@ class UsuarioController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        if (Auth::user()->rol->nombre !== 'Admin') {
+            abort(403, 'No autorizado');
+        }
+
+        $usuario = User::findOrFail($id);
+        $empresas = Empresa::where('estado', 'activa')->get();
+        $roles = Rol::where('estado', 'activo')->get();
+
+        return view('usuarios.edit', compact('usuario', 'empresas', 'roles'));
     }
 
 
@@ -97,7 +106,7 @@ class UsuarioController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        if (auth()->user()->rol->nombre !== 'Admin') {
+        if (Auth::user()->rol->nombre !== 'Admin') {
             abort(403, 'No autorizado');
         }
 
@@ -107,16 +116,23 @@ class UsuarioController extends Controller
             'name' => 'required|string|max:100',
             'email' => 'required|email|unique:users,email,' . $usuario->id,
             'rol_id' => 'required|exists:rols,id',
-            'empresa_id' => 'nullable|exists:empresas,id'
+            'empresa_id' => 'nullable|exists:empresas,id',
+            'password' => 'nullable|min:6'
         ]);
 
-        $usuario->update([
+        $datos = [
             'name' => $request->name,
             'email' => $request->email,
             'empresa_id' => $request->empresa_id,
             'rol_id' => $request->rol_id,
             'estado' => $request->estado
-        ]);
+        ];
+
+        if ($request->filled('password')) {
+            $datos['password'] = bcrypt($request->password);
+        }
+
+        $usuario->update($datos);
 
         return redirect()
             ->route('usuarios.index')
@@ -129,7 +145,7 @@ class UsuarioController extends Controller
      */
     public function destroy(string $id)
     {
-        if (auth()->user()->rol->nombre !== 'Admin') {
+        if (Auth::user()->rol->nombre !== 'Admin') {
             abort(403, 'No autorizado');
         }
 

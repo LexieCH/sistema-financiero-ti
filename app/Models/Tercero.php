@@ -16,6 +16,7 @@ class Tercero extends Model
         'empresa_id',
         'razon_social',
         'rut',
+        'tipo',
         'telefono',
         'email',
         'direccion',
@@ -34,9 +35,9 @@ public function empresa(){
     return $this->belongsTo(Empresa::class);
 }
 
-public function documentos(){
+public function movimientos(){
 
-    return $this->hasMany(Documento::class);
+    return $this->hasMany(Movimiento::class);
 }
 
 }

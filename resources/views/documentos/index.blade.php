@@ -5,6 +5,11 @@
     Documentos
 </x-slot>
 
+@php
+    // Usamos permisos por acción para mostrar solo botones válidos para cada rol.
+    $usuarioAuth = Auth::user();
+@endphp
+
 {{-- KPI --}}
 <div class="kpi-grid kpi-3">
 
@@ -40,10 +45,11 @@
 
 {{-- BOTON --}}
 <div style="margin-bottom:20px">
-
+    @if($usuarioAuth->tienePermiso('documentos', 'crear'))
     <button onclick="abrirModalDocumento()" class="btn-save">
         Nuevo documento
     </button>
+    @endif
 
 </div>
 
@@ -105,7 +111,7 @@
 
                     <td>
 
-                        @if($doc->estado == 'pendiente')
+                        @if($doc->estado == 'pendiente' && $usuarioAuth->tienePermiso('pagos', 'crear'))
 
                         <button
                             class="btn-sm success"
@@ -116,7 +122,7 @@
 
                         @endif
 
-
+                        @if($usuarioAuth->tienePermiso('documentos', 'eliminar'))
                         <form
                             method="POST"
                             action="{{ route('documentos.destroy',$doc->id) }}"
@@ -125,11 +131,12 @@
                             @csrf
                             @method('DELETE')
 
-                            <button class="btn-sm danger">
-                                Eliminar
+                            <button class="btn-sm danger" onclick="return confirm('¿Anular documento?')">
+                                Anular
                             </button>
 
                         </form>
+                        @endif
 
                     </td>
 
@@ -145,9 +152,13 @@
 
 
 {{-- MODAL CREAR --}}
+@if($usuarioAuth->tienePermiso('documentos', 'crear'))
 @include('documentos.modal-create')
+@endif
 
+@if($usuarioAuth->tienePermiso('pagos', 'crear'))
 @include('documentos.modal-pago')
+@endif
 
 {{-- FUTURO MODAL EDIT --}}
 

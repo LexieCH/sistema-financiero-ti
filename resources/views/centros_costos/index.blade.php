@@ -1,10 +1,16 @@
 <x-app-layout>
 
+@php
+    // Acá controlamos qué botones mostrar según lo que permite el rol.
+    $usuarioAuth = Auth::user();
+@endphp
+
 <x-slot name="header">
     Centros de Costos
 </x-slot>
 
 <x-slot name="topbarAction">
+@if($usuarioAuth->tienePermiso('centros-costos', 'crear'))
 <a href="{{ route('centros-costos.create') }}" class="btn-primary">
     <svg viewBox="0 0 24 24">
         <line x1="12" y1="5" x2="12" y2="19"/>
@@ -12,6 +18,7 @@
     </svg>
     Nuevo
 </a>
+@endif
 </x-slot>
 
 
@@ -144,6 +151,7 @@ Inactivo
 
 <td>
 
+@if($usuarioAuth->tienePermiso('centros-costos', 'editar'))
 <a href="{{ route('centros-costos.edit',$centro) }}" class="btn-sm">
 <svg viewBox="0 0 24 24">
 <path d="M12 20h9"/>
@@ -151,23 +159,26 @@ Inactivo
 </svg>
 Editar
 </a>
+@endif
 
+@if($usuarioAuth->tienePermiso('centros-costos', 'eliminar'))
 <form action="{{ route('centros-costos.destroy',$centro) }}" method="POST" style="display:inline">
 @csrf
 @method('DELETE')
 
-<button class="btn-sm danger" onclick="return confirm('Eliminar centro de costo?')">
+<button class="btn-sm danger" onclick="return confirm('¿Desactivar centro de costo?')">
 
 <svg viewBox="0 0 24 24">
 <polyline points="3 6 5 6 21 6"/>
 <path d="M19 6l-2 14H7L5 6"/>
 </svg>
 
-Eliminar
+Desactivar
 
 </button>
 
 </form>
+@endif
 
 </td>
 
@@ -182,3 +193,26 @@ Eliminar
 </div>
 
 </x-app-layout>
+<script>
+
+$(document).ready(function(){
+
+    var tabla = $('#tablaCentros').DataTable({
+        pageLength:10,
+        language:{
+            search:"",
+            info:"Mostrando _START_ a _END_ de _TOTAL_ registros",
+            paginate:{
+                previous:"←",
+                next:"→"
+            }
+        }
+    });
+
+    $('#buscar').on('keyup', function(){
+        tabla.search(this.value).draw();
+    });
+
+});
+
+</script>

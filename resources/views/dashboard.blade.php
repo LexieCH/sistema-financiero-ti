@@ -71,6 +71,36 @@
 
     </div>
 
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">Gastos por centro de costo (mes actual)</div>
+        </div>
+        <div style="padding: 12px 20px 20px;">
+            <table style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Centro de costo</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @forelse($gastosCentroCosto ?? [] as $gasto)
+                    <tr>
+                        <td>{{ $gasto->centroCosto->nombre ?? 'Sin centro' }}</td>
+                        <td>${{ number_format($gasto->total, 0, ',', '.') }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="2" style="text-align:center;color:var(--muted)">
+                            No hay gastos registrados por centro de costo este mes
+                        </td>
+                    </tr>
+                @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     {{-- ACCESOS RÁPIDOS --}}
     <div class="card">
         <div class="card-header">

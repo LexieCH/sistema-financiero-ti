@@ -12,6 +12,8 @@ use Database\Seeders\TipoMovimientoSeeder;
 use Database\Seeders\CategoriaSeeder;
 use Database\Seeders\MetodoPagoSeeder;
 use Database\Seeders\TerceroSeeder;
+use Database\Seeders\ModuloSeeder;
+use Database\Seeders\PermisoSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -26,6 +28,8 @@ class DatabaseSeeder extends Seeder
             CategoriaSeeder::class,
             MetodoPagoSeeder::class,
             TerceroSeeder::class,
+            ModuloSeeder::class,
+            PermisoSeeder::class,
         ]);
     }
 }

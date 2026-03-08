@@ -10,7 +10,7 @@ use App\Models\TipoMovimiento;
 use App\Models\Tercero;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+use App\Helpers\BitacoraHelper;
 
 
 class MovimientoController extends Controller
@@ -18,17 +18,18 @@ class MovimientoController extends Controller
     
     public function index()
     {
+        // Siempre filtramos por empresa para que un usuario no vea datos de otra empresa.
         $empresaId = Auth::user()->empresa_id;
 
-        $movimientos = Movimiento::with(['tipoMovimiento','categoria','usuario'])
+        $movimientos = Movimiento::with(['tipoMovimiento','categoria','usuario','centroCosto.proyecto'])
             ->where('empresa_id',$empresaId)
             ->orderBy('fecha','desc')
             ->get();
 
-        // fecha hoy
+        // Estos KPIs son para ver el pulso del día en una sola pantalla.
         $hoy = now()->format('Y-m-d');
 
-        // ingresos hoy
+        // Ingresos del día según la naturaleza del tipo de movimiento.
         $ingresosHoy = Movimiento::where('empresa_id',$empresaId)
             ->whereDate('fecha',$hoy)
             ->whereHas('tipoMovimiento', function($q){
@@ -36,7 +37,7 @@ class MovimientoController extends Controller
             })
             ->sum('monto');
 
-        // egresos hoy
+        // Egresos del día con la misma lógica.
         $egresosHoy = Movimiento::where('empresa_id',$empresaId)
             ->whereDate('fecha',$hoy)
             ->whereHas('tipoMovimiento', function($q){
@@ -45,15 +46,6 @@ class MovimientoController extends Controller
             ->sum('monto');
 
         $saldoHoy = $ingresosHoy - $egresosHoy;
-
-        $gastosCentroCosto = Movimiento::where('empresa_id',$empresaId)
-            ->whereHas('tipoMovimiento', function($q){
-                $q->where('naturaleza','egreso');
-            })
-            ->selectRaw('centro_costo_id, SUM(monto) as total')
-            ->groupBy('centro_costo_id')
-            ->with('centroCosto')
-            ->get();
 
         return view('movimientos.index', compact(
             'movimientos',
@@ -68,6 +60,7 @@ class MovimientoController extends Controller
      */
     public function create()
     {
+        // Traemos catálogos ya filtrados por empresa para poblar combos del formulario.
         $empresaId = Auth::user()->empresa_id;
 
         return view('movimientos.create', [
@@ -75,7 +68,7 @@ class MovimientoController extends Controller
             'categorias' => Categoria::where('empresa_id',$empresaId)->get(),
             'metodos' => MetodoPago::where('empresa_id',$empresaId)->get(),
             'terceros' => Tercero::where('empresa_id',$empresaId)->get(),
-            'centros' => CentroCosto::where('empresa_id',$empresaId)->get(),
+            'centros' => CentroCosto::with('proyecto')->where('empresa_id',$empresaId)->get(),
         ]);
     }
 
@@ -84,21 +77,23 @@ class MovimientoController extends Controller
      */
     public function store(Request $request)
     {
+        // Validación base del formulario.
         $request->validate([
             'tipo_movimiento_id' => 'required',
             'categoria_id' => 'required',
-            'centro_costo_id' => 'nullable|exists:centro_costos,id',
+            'centro_costo_id' => 'required|exists:centro_costos,id',
             'monto' => 'required',
             'fecha' => 'required'
         ]);
 
-        $monto = str_replace('.', '', $request->monto);
-        $monto = str_replace(',', '.', $monto);
+        // Normalizamos formato de monto por si viene con puntos/comas.
+        $monto = $this->normalizarMonto($request->monto);
 
         if(!is_numeric($monto) || $monto <= 0){
             return back()->withErrors(['monto' => 'Monto inválido']);
         }
 
+        // Movimiento es la tabla central, aquí se registra toda la operación financiera.
         Movimiento::create([
 
             'empresa_id' => Auth::user()->empresa_id,
@@ -119,7 +114,9 @@ class MovimientoController extends Controller
 
             'descripcion' => $request->descripcion,
 
-            'usuario_id' => auth()->id()
+            'usuario_id' => Auth::id(),
+
+            'estado'     => 'confirmado'
 
         ]);
 
@@ -132,7 +129,7 @@ class MovimientoController extends Controller
      */
     public function show(string $id)
     {
-        //
+        return redirect()->route('movimientos.edit', $id);
     }
 
     /**
@@ -140,7 +137,19 @@ class MovimientoController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $empresaId = Auth::user()->empresa_id;
+
+        $movimiento = Movimiento::where('empresa_id', $empresaId)
+            ->findOrFail($id);
+
+        return view('movimientos.edit', [
+            'movimiento' => $movimiento,
+            'tipos' => TipoMovimiento::where('estado',1)->get(),
+            'categorias' => Categoria::where('empresa_id',$empresaId)->get(),
+            'metodos' => MetodoPago::where('empresa_id',$empresaId)->get(),
+            'terceros' => Tercero::where('empresa_id',$empresaId)->get(),
+            'centros' => CentroCosto::with('proyecto')->where('empresa_id',$empresaId)->get(),
+        ]);
     }
 
     /**
@@ -148,7 +157,38 @@ class MovimientoController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $empresaId = Auth::user()->empresa_id;
+
+        $movimiento = Movimiento::where('empresa_id', $empresaId)
+            ->findOrFail($id);
+
+        $request->validate([
+            'tipo_movimiento_id' => 'required',
+            'categoria_id' => 'required',
+            'centro_costo_id' => 'required|exists:centro_costos,id',
+            'monto' => 'required',
+            'fecha' => 'required'
+        ]);
+
+        $monto = $this->normalizarMonto($request->monto);
+
+        if(!is_numeric($monto) || $monto <= 0){
+            return back()->withErrors(['monto' => 'Monto inválido']);
+        }
+
+        $movimiento->update([
+            'tipo_movimiento_id' => $request->tipo_movimiento_id,
+            'categoria_id' => $request->categoria_id,
+            'metodo_pago_id' => $request->metodo_pago_id,
+            'centro_costo_id' => $request->centro_costo_id,
+            'tercero_id' => $request->tercero_id,
+            'monto' => $monto,
+            'fecha' => $request->fecha,
+            'descripcion' => $request->descripcion,
+        ]);
+
+        return redirect()->route('movimientos.index')
+            ->with('success', 'Movimiento actualizado correctamente');
     }
 
     /**
@@ -156,6 +196,22 @@ class MovimientoController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $empresaId = Auth::user()->empresa_id;
+
+        $movimiento = Movimiento::where('empresa_id', $empresaId)
+            ->findOrFail($id);
+
+        $movimiento->update([
+            'estado' => 'anulado',
+        ]);
+
+        return redirect()->route('movimientos.index')
+            ->with('editado', 'Movimiento anulado correctamente');
+    }
+
+    private function normalizarMonto($monto): string
+    {
+        $valor = str_replace('.', '', (string) $monto);
+        return str_replace(',', '.', $valor);
     }
 }

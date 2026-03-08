@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Empresa;
+use App\Helpers\RutHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class EmpresaController extends Controller
 {
@@ -32,10 +34,22 @@ class EmpresaController extends Controller
      */
     public function store(Request $request)
     {
-        // Validación tercer intento
+        $rut = RutHelper::normalizar($request->rut_empresa);
+
+        if (!$rut || !RutHelper::esValido($rut)) {
+            return back()->withInput()->withErrors([
+                'rut_empresa' => 'El RUT de empresa no es válido.'
+            ]);
+        }
+
         $request->validate([
             'nombre_fantasia' => 'required|string|max:150',
-            'rut_empresa'     => 'nullable|string|max:20',
+            'rut_empresa'     => [
+                'required',
+                'string',
+                'max:20',
+                Rule::unique('empresas', 'rut_empresa')
+            ],
             'razon_social'    => 'nullable|string|max:150',
             'giro'            => 'nullable|string|max:150'
         ]);
@@ -44,7 +58,7 @@ class EmpresaController extends Controller
 
             Empresa::create([
                 'nombre_fantasia' => $request->nombre_fantasia,
-                'rut_empresa'     => $request->rut_empresa,
+                'rut_empresa'     => $rut,
                 'razon_social'    => $request->razon_social,
                 'giro'            => $request->giro,
                 'estado'          => 'activa',
@@ -75,7 +89,7 @@ class EmpresaController extends Controller
     public function edit(string $id)
     {
         $empresa = Empresa::findOrFail($id);
-        return response()->json($empresa); // para modal edit
+        return view('empresas.edit', compact('empresa'));
     }
 
     /**
@@ -83,9 +97,22 @@ class EmpresaController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        $rut = RutHelper::normalizar($request->rut_empresa);
+
+        if (!$rut || !RutHelper::esValido($rut)) {
+            return back()->withInput()->withErrors([
+                'rut_empresa' => 'El RUT de empresa no es válido.'
+            ]);
+        }
+
         $request->validate([
             'nombre_fantasia' => 'required|string|max:150',
-            'rut_empresa'     => 'nullable|string|max:20',
+            'rut_empresa'     => [
+                'required',
+                'string',
+                'max:20',
+                Rule::unique('empresas', 'rut_empresa')->ignore($id)
+            ],
             'razon_social'    => 'nullable|string|max:150',
             'giro'            => 'nullable|string|max:150',
             'estado'          => 'required'
@@ -97,7 +124,7 @@ class EmpresaController extends Controller
 
             $empresa->update([
                 'nombre_fantasia' => $request->nombre_fantasia,
-                'rut_empresa'     => $request->rut_empresa,
+                'rut_empresa'     => $rut,
                 'razon_social'    => $request->razon_social,
                 'giro'            => $request->giro,
                 'estado'          => $request->estado
@@ -121,10 +148,10 @@ class EmpresaController extends Controller
         try {
 
             $empresa = Empresa::findOrFail($id);
-            $empresa->delete(); // soft delete recomendado
+            $empresa->update(['estado' => 'inactiva']);
 
             return redirect()->route('empresas.index')
-                ->with('eliminado', 'Empresa eliminada');
+                ->with('editado', 'Empresa desactivada correctamente');
 
         } catch (\Exception $e) {
 
