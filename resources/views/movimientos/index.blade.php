@@ -45,7 +45,7 @@
                     <svg viewBox="0 0 24 24">
                         <polyline points="18 15 12 9 6 15"/>
                     </svg>
-                    Hoy
+                    Mes
                 </span>
 
             </div>
@@ -53,7 +53,7 @@
             <div class="kpi-body">
 
                 <div class="kpi-label">
-                    Ingresos del día
+                    Ingresos del mes
                 </div>
 
                 <div class="kpi-value green">
@@ -85,7 +85,7 @@
                     <svg viewBox="0 0 24 24">
                         <polyline points="6 9 12 15 18 9"/>
                     </svg>
-                    Hoy
+                    Mes
                 </span>
 
             </div>
@@ -93,7 +93,7 @@
             <div class="kpi-body">
 
                 <div class="kpi-label">
-                    Egresos del día
+                    Egresos del mes
                 </div>
 
                 <div class="kpi-value red">
@@ -130,7 +130,7 @@
             <div class="kpi-body">
 
                 <div class="kpi-label">
-                    Saldo del día
+                    Saldo del mes
                 </div>
 
                 <div class="kpi-value blue">
@@ -196,6 +196,7 @@
                 <tr>
                     <th>N°</th>
                     <th>Tipo</th>
+                    <th>Origen</th>
                     <th>Descripción</th>
                     <th>Monto</th>
                     <th>Fecha</th>
@@ -235,6 +236,23 @@
 
                         @endif
 
+                    </td>
+
+                    <td>
+                        @if(
+                            \Illuminate\Support\Str::startsWith((string) $m->referencia, 'PAGO-')
+                            || !is_null($m->documento_id)
+                        )
+                            <span class="badge blue">
+                                <span class="badge-dot"></span>
+                                Pago documento
+                            </span>
+                        @else
+                            <span class="badge yellow">
+                                <span class="badge-dot"></span>
+                                Manual
+                            </span>
+                        @endif
                     </td>
 
 

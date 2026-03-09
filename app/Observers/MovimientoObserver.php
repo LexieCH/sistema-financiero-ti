@@ -11,11 +11,17 @@ class MovimientoObserver
     public function created(Movimiento $movimiento)
     {
 
+        $descripcion = 'Se registró un movimiento por $' . number_format($movimiento->monto,0,',','.');
+
+        if (str_starts_with((string) $movimiento->referencia, 'PAGO-')) {
+            $descripcion = 'Se registró movimiento automático desde pago (' . $movimiento->referencia . ')';
+        }
+
         BitacoraHelper::registrar(
             'Movimiento',
             'crear',
             $movimiento->id,
-            'Se registró un movimiento por $' . number_format($movimiento->monto,0,',','.')
+            $descripcion
         );
 
     }

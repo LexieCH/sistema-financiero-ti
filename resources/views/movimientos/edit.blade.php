@@ -39,17 +39,6 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Categoría <span style="color:var(--red)">*</span></label>
-                    <select name="categoria_id" class="form-control" required>
-                        @foreach($categorias as $categoria)
-                            <option value="{{ $categoria->id }}" {{ (int) old('categoria_id', $movimiento->categoria_id) === (int) $categoria->id ? 'selected' : '' }}>
-                                {{ $categoria->nombre }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="form-group">
                     <label>Centro de costo <span style="color:var(--red)">*</span></label>
                     <select name="centro_costo_id" class="form-control" required>
                         @foreach($centros as $centro)

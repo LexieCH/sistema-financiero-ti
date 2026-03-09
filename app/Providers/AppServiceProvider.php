@@ -8,7 +8,10 @@ use App\Models\Movimiento;
 use App\Observers\MovimientoObserver;
 use App\Models\Documento;
 use App\Observers\DocumentoObserver;
+use App\Models\Pago;
+use App\Observers\PagoObserver;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
 
 use App\Helpers\BitacoraHelper;
@@ -33,6 +36,8 @@ class AppServiceProvider extends ServiceProvider
         Movimiento::observe(MovimientoObserver::class);
 
         Documento::observe(DocumentoObserver::class);
+
+        Pago::observe(PagoObserver::class);
 
         //INICIO DE SESIÓN
         Event::listen(Login::class, function ($event) {

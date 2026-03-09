@@ -382,7 +382,7 @@
         .modal-body   { padding:22px; display:flex; flex-direction:column; gap:16px; }
         .modal-footer {
             padding:14px 22px; border-top:1px solid #2a2e42;
-            display:flex; justify-content:flex-end; gap:8px; background:var(--surface2);
+            display:flex; justify-content:flex-end; gap:8px; background:#151a29;
         }
 
         .modal-box h3 { color: #f4f6ff; font-size: 20px; font-weight: 600; margin: 0 0 20px 0; padding-bottom: 20px; border-bottom: 1px solid #2a2e42; letter-spacing: -0.02em; }
@@ -398,6 +398,19 @@
             -webkit-appearance: none;
             appearance: none;
         }
+        .modal-box input[type="date"],
+        .modal-box input[type="datetime-local"],
+        .modal-box input[type="time"] {
+            -webkit-appearance: auto;
+            appearance: auto;
+            color-scheme: dark;
+        }
+        .modal-box input[type="date"]::-webkit-calendar-picker-indicator,
+        .modal-box input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+        .modal-box input[type="time"]::-webkit-calendar-picker-indicator {
+            opacity: 1;
+            cursor: pointer;
+        }
         .modal-box .form-control:focus {
             border-color: #3b5bdb;
             box-shadow: 0 0 0 3px rgba(59, 91, 219, 0.15);
@@ -406,9 +419,9 @@
         .modal-box .btn-cancel,
         .modal-box .btn-sm,
         .modal-footer button[type="button"] {
-            background: transparent;
+            background: #1b2342;
             color: #c2c8e0;
-            border: 1px solid #2a2e42;
+            border: 1px solid #4d5b92;
             border-radius: 10px;
             padding: 12px 22px;
             cursor:pointer;
@@ -420,9 +433,9 @@
         .modal-box .btn-cancel:hover,
         .modal-box .btn-sm:hover,
         .modal-footer button[type="button"]:hover {
-            background: rgba(255,255,255,0.06);
+            background: #243057;
             color: #f0f2fa;
-            border-color: #3a3f58;
+            border-color: #6273b0;
         }
         .modal-box .btn-save {
             background: #3b5bdb;
@@ -503,11 +516,8 @@
         @if($puedeVerFinanzas)
             <div class="nav-section">Finanzas</div>
 
-            @if($usuarioAuth->tienePermiso('movimientos'))
-            <a href="{{ route('movimientos.index') }}" class="nav-item {{ request()->routeIs('movimientos.*') ? 'active' : '' }}">
-                <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
-                Movimientos
-            </a>
+            @if($usuarioAuth->tienePermiso('documentos') || $usuarioAuth->tienePermiso('tipos-documentos'))
+            <div class="nav-section">📄 Documentos</div>
             @endif
 
             @if($usuarioAuth->tienePermiso('documentos'))
@@ -527,6 +537,17 @@
             </a>
             @endif
 
+            @if($usuarioAuth->tienePermiso('movimientos') || $usuarioAuth->tienePermiso('pagos'))
+            <div class="nav-section">💰 Movimientos</div>
+            @endif
+
+            @if($usuarioAuth->tienePermiso('movimientos'))
+            <a href="{{ route('movimientos.index') }}" class="nav-item {{ request()->routeIs('movimientos.*') ? 'active' : '' }}">
+                <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                Movimientos
+            </a>
+            @endif
+
             @if($usuarioAuth->tienePermiso('pagos'))
             <a href="{{ route('pagos.index') }}" class="nav-item {{ request()->routeIs('pagos.*') ? 'active' : '' }}">
                 <svg viewBox="0 0 24 24">
@@ -535,6 +556,10 @@
                 </svg>
                 Pagos
             </a>
+            @endif
+
+            @if($usuarioAuth->tienePermiso('centros-costos'))
+            <div class="nav-section">📊 Costos</div>
             @endif
 
             @if($usuarioAuth->tienePermiso('centros-costos'))

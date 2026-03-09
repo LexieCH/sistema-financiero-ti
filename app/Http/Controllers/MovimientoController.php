@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Movimiento;
-use App\Models\Categoria;
 use App\Models\CentroCosto;
 use App\Models\MetodoPago;
 use App\Models\TipoMovimiento;
@@ -20,30 +19,26 @@ class MovimientoController extends Controller
     {
         // Siempre filtramos por empresa para que un usuario no vea datos de otra empresa.
         $empresaId = Auth::user()->empresa_id;
+        $inicioMes = now()->startOfMonth();
+        $finMes = now()->endOfMonth();
 
-        $movimientos = Movimiento::with(['tipoMovimiento','categoria','usuario','centroCosto.proyecto'])
+        $movimientos = Movimiento::with(['tipoMovimiento','usuario','centroCosto.proyecto','documento'])
             ->where('empresa_id',$empresaId)
             ->orderBy('fecha','desc')
             ->get();
 
-        // Estos KPIs son para ver el pulso del día en una sola pantalla.
-        $hoy = now()->format('Y-m-d');
+        // KPIs del mes actual con suma condicional para evitar desajustes por tipos incompletos.
+        $totalesMes = Movimiento::query()
+            ->join('tipo_movimientos as tm', 'tm.id', '=', 'movimientos.tipo_movimiento_id')
+            ->where('movimientos.empresa_id', $empresaId)
+            ->whereBetween('movimientos.fecha', [$inicioMes, $finMes])
+            ->where('movimientos.estado', '!=', 'anulado')
+            ->selectRaw("COALESCE(SUM(CASE WHEN LOWER(COALESCE(tm.naturaleza, '')) = 'ingreso' OR LOWER(COALESCE(tm.nombre, '')) = 'ingreso' THEN movimientos.monto ELSE 0 END), 0) as ingresos_mes")
+            ->selectRaw("COALESCE(SUM(CASE WHEN LOWER(COALESCE(tm.naturaleza, '')) = 'egreso' OR LOWER(COALESCE(tm.nombre, '')) = 'egreso' THEN movimientos.monto ELSE 0 END), 0) as egresos_mes")
+            ->first();
 
-        // Ingresos del día según la naturaleza del tipo de movimiento.
-        $ingresosHoy = Movimiento::where('empresa_id',$empresaId)
-            ->whereDate('fecha',$hoy)
-            ->whereHas('tipoMovimiento', function($q){
-                $q->where('naturaleza','ingreso');
-            })
-            ->sum('monto');
-
-        // Egresos del día con la misma lógica.
-        $egresosHoy = Movimiento::where('empresa_id',$empresaId)
-            ->whereDate('fecha',$hoy)
-            ->whereHas('tipoMovimiento', function($q){
-                $q->where('naturaleza','egreso');
-            })
-            ->sum('monto');
+        $ingresosHoy = (float) ($totalesMes->ingresos_mes ?? 0);
+        $egresosHoy = (float) ($totalesMes->egresos_mes ?? 0);
 
         $saldoHoy = $ingresosHoy - $egresosHoy;
 
@@ -65,7 +60,6 @@ class MovimientoController extends Controller
 
         return view('movimientos.create', [
             'tipos' => TipoMovimiento::where('estado',1)->get(),
-            'categorias' => Categoria::where('empresa_id',$empresaId)->get(),
             'metodos' => MetodoPago::where('empresa_id',$empresaId)->get(),
             'terceros' => Tercero::where('empresa_id',$empresaId)->get(),
             'centros' => CentroCosto::with('proyecto')->where('empresa_id',$empresaId)->get(),
@@ -80,7 +74,6 @@ class MovimientoController extends Controller
         // Validación base del formulario.
         $request->validate([
             'tipo_movimiento_id' => 'required',
-            'categoria_id' => 'required',
             'centro_costo_id' => 'required|exists:centro_costos,id',
             'monto' => 'required',
             'fecha' => 'required'
@@ -99,8 +92,6 @@ class MovimientoController extends Controller
             'empresa_id' => Auth::user()->empresa_id,
 
             'tipo_movimiento_id' => $request->tipo_movimiento_id,
-
-            'categoria_id' => $request->categoria_id,
 
             'metodo_pago_id' => $request->metodo_pago_id,
 
@@ -145,7 +136,6 @@ class MovimientoController extends Controller
         return view('movimientos.edit', [
             'movimiento' => $movimiento,
             'tipos' => TipoMovimiento::where('estado',1)->get(),
-            'categorias' => Categoria::where('empresa_id',$empresaId)->get(),
             'metodos' => MetodoPago::where('empresa_id',$empresaId)->get(),
             'terceros' => Tercero::where('empresa_id',$empresaId)->get(),
             'centros' => CentroCosto::with('proyecto')->where('empresa_id',$empresaId)->get(),
@@ -164,7 +154,6 @@ class MovimientoController extends Controller
 
         $request->validate([
             'tipo_movimiento_id' => 'required',
-            'categoria_id' => 'required',
             'centro_costo_id' => 'required|exists:centro_costos,id',
             'monto' => 'required',
             'fecha' => 'required'
@@ -178,7 +167,6 @@ class MovimientoController extends Controller
 
         $movimiento->update([
             'tipo_movimiento_id' => $request->tipo_movimiento_id,
-            'categoria_id' => $request->categoria_id,
             'metodo_pago_id' => $request->metodo_pago_id,
             'centro_costo_id' => $request->centro_costo_id,
             'tercero_id' => $request->tercero_id,

@@ -4,7 +4,7 @@
 
         <h3>Nuevo documento</h3>
 
-        <form method="POST" action="{{ route('documentos.store') }}">
+        <form method="POST" action="{{ route('documentos.store') }}" enctype="multipart/form-data">
             @csrf
 
             <div class="form-grid">
@@ -24,11 +24,29 @@
                 </div>
 
                 <div class="form-group">
+                    <label>Cliente / Proveedor</label>
+
+                    <select name="tercero_id" class="form-control" required>
+                        <option value="">Seleccione</option>
+
+                        @foreach($terceros as $tercero)
+                            <option value="{{ $tercero->id }}">
+                                {{ $tercero->rut ?? 'Sin RUT' }} - {{ $tercero->razon_social }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="form-group">
                     <label>Fecha</label>
 
                     <input type="date"
                         name="fecha_emision"
-                        class="form-control">
+                        class="form-control"
+                        value="{{ now()->toDateString() }}"
+                        min="{{ now()->toDateString() }}"
+                        max="{{ now()->toDateString() }}"
+                        readonly>
                 </div>
 
                 <div class="form-group">
@@ -56,6 +74,15 @@
                         id="total_display"
                         class="form-control"
                         readonly>
+                </div>
+
+                <div class="form-group">
+                    <label>PDF adjunto</label>
+
+                    <input type="file"
+                        name="pdf"
+                        class="form-control"
+                        accept="application/pdf">
                 </div>
 
             </div>

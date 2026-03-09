@@ -93,6 +93,7 @@
                     <th>Saldo</th>
                     <th>Monto pago</th>
                     <th>Fecha</th>
+                    <th>Movimiento</th>
                 </tr>
 
             </thead>
@@ -136,6 +137,18 @@
 
                         <td>
                             {{ \Carbon\Carbon::parse($pago->fecha_pago)->format('d-m-Y') }}
+                        </td>
+
+                        <td>
+                            @php($movId = $movimientosPorReferencia['PAGO-' . $pago->id] ?? null)
+
+                            @if($movId)
+                                <a href="{{ route('movimientos.edit', $movId) }}" class="btn-sm">
+                                    Ver movimiento
+                                </a>
+                            @else
+                                <span class="badge yellow"><span class="badge-dot"></span>Sin movimiento</span>
+                            @endif
                         </td>
 
                     </tr>

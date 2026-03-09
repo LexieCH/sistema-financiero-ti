@@ -11,6 +11,7 @@ use App\Models\Empresa;
 use App\Models\User;
 use App\Models\Movimiento;
 use App\Models\Pago;
+use App\Models\Tercero;
 
 class Documento extends Model
 {
@@ -18,6 +19,7 @@ class Documento extends Model
 
     protected $fillable = [
         'empresa_id',
+        'tercero_id',
         'usuario_id',
         'tipo_documento_id',
         'folio',
@@ -45,6 +47,11 @@ class Documento extends Model
     public function tipoDocumento()
     {
         return $this->belongsTo(TipoDocumento::class);
+    }
+
+    public function tercero()
+    {
+        return $this->belongsTo(Tercero::class);
     }
 
     public function movimientos()

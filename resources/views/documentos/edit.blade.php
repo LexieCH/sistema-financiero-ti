@@ -9,7 +9,7 @@ Editar documento
         <div class="card-title">Actualizar documento</div>
     </div>
 
-    <form method="POST" action="{{ route('documentos.update', $documento->id) }}">
+    <form method="POST" action="{{ route('documentos.update', $documento->id) }}" enctype="multipart/form-data">
         @csrf
         @method('PUT')
 
@@ -20,6 +20,18 @@ Editar documento
                     @foreach($tipos as $tipo)
                         <option value="{{ $tipo->id }}" {{ (int) old('tipo_documento_id', $documento->tipo_documento_id) === (int) $tipo->id ? 'selected' : '' }}>
                             {{ $tipo->nombre }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Cliente / Proveedor</label>
+                <select name="tercero_id" class="form-control" required>
+                    <option value="">Seleccione</option>
+                    @foreach($terceros as $tercero)
+                        <option value="{{ $tercero->id }}" {{ (int) old('tercero_id', $documento->tercero_id) === (int) $tercero->id ? 'selected' : '' }}>
+                            {{ $tercero->rut ?? 'Sin RUT' }} - {{ $tercero->razon_social }}
                         </option>
                     @endforeach
                 </select>
@@ -38,6 +50,17 @@ Editar documento
             <div class="form-group">
                 <label>Monto neto</label>
                 <input type="number" step="0.01" name="monto_neto" class="form-control" value="{{ old('monto_neto', $documento->monto_neto) }}" required>
+            </div>
+
+            <div class="form-group">
+                <label>PDF adjunto</label>
+                <input type="file" name="pdf" class="form-control" accept="application/pdf">
+
+                @if($documento->pdf_url)
+                    <a href="{{ asset('storage/' . $documento->pdf_url) }}" target="_blank" class="btn-sm" style="margin-top:8px;display:inline-block;">
+                        Ver PDF actual
+                    </a>
+                @endif
             </div>
         </div>
 

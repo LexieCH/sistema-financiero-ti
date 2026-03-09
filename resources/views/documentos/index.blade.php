@@ -42,7 +42,6 @@
 
 </div>
 
-
 {{-- BOTON --}}
 <div style="margin-bottom:20px">
     @if($usuarioAuth->tienePermiso('documentos', 'crear'))
@@ -63,11 +62,13 @@
             <tr>
                 <th>ID</th>
                 <th>Tipo</th>
+                <th>Tercero</th>
                 <th>Fecha</th>
                 <th>Neto</th>
                 <th>IVA</th>
                 <th>Total</th>
                 <th>Saldo</th>
+                <th>PDF</th>
                 <th>Estado</th>
                 <th>Acciones</th>
             </tr>
@@ -83,6 +84,14 @@
 
                     <td>
                         {{ $doc->tipoDocumento->nombre ?? '-' }}
+                    </td>
+
+                    <td>
+                        @if($doc->tercero)
+                            {{ $doc->tercero->rut ?? 'Sin RUT' }} - {{ $doc->tercero->razon_social }}
+                        @else
+                            —
+                        @endif
                     </td>
 
                     <td>
@@ -106,6 +115,16 @@
                     </td>
 
                     <td>
+                        @if($doc->pdf_url)
+                            <a href="{{ asset('storage/' . $doc->pdf_url) }}" target="_blank" class="btn-sm">
+                                Ver PDF
+                            </a>
+                        @else
+                            <span class="badge yellow"><span class="badge-dot"></span>Sin PDF</span>
+                        @endif
+                    </td>
+
+                    <td>
                         {{ ucfirst($doc->estado) }}
                     </td>
 
@@ -115,7 +134,7 @@
 
                         <button
                             class="btn-sm success"
-                            onclick="abrirModalPago({{ $doc->id }})"
+                            onclick="abrirModalPago({{ $doc->id }}, {{ (float) $doc->saldoPendiente() }})"
                         >
                             Registrar pago
                         </button>

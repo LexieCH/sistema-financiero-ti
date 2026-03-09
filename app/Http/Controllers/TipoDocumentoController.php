@@ -40,10 +40,14 @@ class TipoDocumentoController extends Controller
             'categoria' => 'required|in:compra,venta,interno',
             'usa_iva' => 'required|boolean',
             'credito_fiscal' => 'required|boolean',
-            'genera_movimiento' => 'required|boolean',
             'tipo_movimiento_id' => 'nullable|exists:tipo_movimientos,id',
             'estado' => 'required|in:activo,inactivo',
         ]);
+
+        $tipoMovimientoId = $this->resolverTipoMovimientoParaTipoDocumento(
+            $request->categoria,
+            $request->tipo_movimiento_id
+        );
 
         TipoDocumento::create([
             'empresa_id' => $empresaId,
@@ -51,8 +55,8 @@ class TipoDocumentoController extends Controller
             'categoria' => $request->categoria,
             'usa_iva' => $request->boolean('usa_iva'),
             'credito_fiscal' => $request->boolean('credito_fiscal'),
-            'genera_movimiento' => $request->boolean('genera_movimiento'),
-            'tipo_movimiento_id' => $request->tipo_movimiento_id,
+            'genera_movimiento' => false,
+            'tipo_movimiento_id' => $tipoMovimientoId,
             'estado' => $request->estado,
         ]);
 
@@ -94,7 +98,6 @@ class TipoDocumentoController extends Controller
             'categoria' => 'required|in:compra,venta,interno',
             'usa_iva' => 'required|boolean',
             'credito_fiscal' => 'required|boolean',
-            'genera_movimiento' => 'required|boolean',
             'tipo_movimiento_id' => 'nullable|exists:tipo_movimientos,id',
             'estado' => 'required|in:activo,inactivo',
         ]);
@@ -103,14 +106,19 @@ class TipoDocumentoController extends Controller
             $tipos_documento->empresa_id = $empresaId;
         }
 
+        $tipoMovimientoId = $this->resolverTipoMovimientoParaTipoDocumento(
+            $request->categoria,
+            $request->tipo_movimiento_id
+        );
+
         $tipos_documento->update([
             'empresa_id' => $tipos_documento->empresa_id,
             'nombre' => $request->nombre,
             'categoria' => $request->categoria,
             'usa_iva' => $request->boolean('usa_iva'),
             'credito_fiscal' => $request->boolean('credito_fiscal'),
-            'genera_movimiento' => $request->boolean('genera_movimiento'),
-            'tipo_movimiento_id' => $request->tipo_movimiento_id,
+            'genera_movimiento' => false,
+            'tipo_movimiento_id' => $tipoMovimientoId,
             'estado' => $request->estado,
         ]);
 
@@ -132,5 +140,39 @@ class TipoDocumentoController extends Controller
 
         return redirect()->route('tipos-documentos.index')
             ->with('editado', 'Tipo de documento desactivado correctamente');
+    }
+
+    private function resolverTipoMovimientoParaTipoDocumento(string $categoria, $tipoMovimientoId): ?int
+    {
+        if ($categoria === 'interno') {
+            return $tipoMovimientoId ? (int) $tipoMovimientoId : null;
+        }
+
+        return $this->resolverTipoMovimientoPorCategoria($categoria);
+    }
+
+    private function resolverTipoMovimientoPorCategoria(string $categoria): ?int
+    {
+        if ($categoria === 'venta') {
+            return TipoMovimiento::query()
+                ->where(function ($query) {
+                    $query->where('naturaleza', 'ingreso')
+                        ->orWhereRaw("LOWER(nombre) = 'ingreso'");
+                })
+                ->orderBy('id')
+                ->value('id');
+        }
+
+        if ($categoria === 'compra') {
+            return TipoMovimiento::query()
+                ->where(function ($query) {
+                    $query->where('naturaleza', 'egreso')
+                        ->orWhereRaw("LOWER(nombre) = 'egreso'");
+                })
+                ->orderBy('id')
+                ->value('id');
+        }
+
+        return null;
     }
 }
